@@ -1,0 +1,11 @@
+{
+  "id": "UO:0000002",
+  "uri": "http://purl.obolibrary.org/obo/UO_0000002",
+  "relationships": {
+    "is_a": [
+      "IAO:0000003"
+    ]
+  },
+  "label": "mass unit",
+  "definition": "A unit which is a standard measure of the amount of matter/energy of a physical object."
+}

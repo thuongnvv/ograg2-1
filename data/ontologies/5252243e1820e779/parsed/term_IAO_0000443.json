@@ -1,0 +1,17 @@
+{
+  "id": "IAO:0000443",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000443",
+  "relationships": {
+    "is_a": [
+      "OBI:0000011"
+    ],
+    "OBI 0000299": [
+      "IAO:0000027"
+    ],
+    "OBI 0000293": [
+      "IAO:0000013"
+    ]
+  },
+  "label": "data item extraction from journal article",
+  "definition": "a planned process in which journal articles are read or processed and data items are extracted, typically for further analysis or indexing"
+}

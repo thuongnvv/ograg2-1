@@ -1,0 +1,15 @@
+{
+  "id": "BFO:0000011",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000011",
+  "relationships": {
+    "is_a": [
+      "BFO:0000003"
+    ]
+  },
+  "label": "spatiotemporal region",
+  "examples": [
+    "the spatiotemporal region occupied by a human life",
+    "the spatiotemporal region occupied by a process of cellular meiosis.",
+    "the spatiotemporal region occupied by the development of a cancer tumor"
+  ]
+}

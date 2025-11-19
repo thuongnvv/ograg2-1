@@ -1,0 +1,11 @@
+{
+  "id": "GAZ:00000448",
+  "uri": "http://purl.obolibrary.org/obo/GAZ_00000448",
+  "relationships": {
+    "is_a": [
+      "BFO:0000029"
+    ]
+  },
+  "label": "geographic location",
+  "definition": "A reference to a place on the Earth, by its name or by its geographical location."
+}

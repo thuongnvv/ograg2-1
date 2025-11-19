@@ -1,0 +1,11 @@
+{
+  "id": "IAO:0000442",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000442",
+  "relationships": {
+    "is_a": [
+      "BFO:0000023"
+    ]
+  },
+  "label": "author role",
+  "definition": "A role inhering in a person or organization that is realized when the bearer participates in the work which is the basis of the document, in the writing of the document, and signs it with their name."
+}

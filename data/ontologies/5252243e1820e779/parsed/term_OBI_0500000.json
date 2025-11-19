@@ -1,0 +1,11 @@
+{
+  "id": "OBI:0500000",
+  "uri": "http://purl.obolibrary.org/obo/OBI_0500000",
+  "relationships": {
+    "is_a": [
+      "IAO:0000104"
+    ]
+  },
+  "label": "study design",
+  "definition": "A plan specification comprised of protocols (which may specify how and what kinds of data will be gathered) that are executed as part of an investigation and is realized during a study design execution."
+}

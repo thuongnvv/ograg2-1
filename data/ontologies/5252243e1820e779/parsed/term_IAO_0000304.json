@@ -1,0 +1,17 @@
+{
+  "id": "IAO:0000304",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000304",
+  "relationships": {
+    "is_a": [
+      "IAO:0000300"
+    ],
+    "IAO 0000136": [
+      "IAO:0000308"
+    ]
+  },
+  "label": "caption",
+  "definition": "A textual entity that describes a figure",
+  "examples": [
+    "Figure 1: A system diagram describing the modules of the Hanalyzer.  Reading methods (green) take external sources of knowledge (blue) and extract information from them, either by parsing structured data or biomedical language processing to extract information from unstructured data.  Reading modules are responsible for tracking the provenance of all knowledge.  Reasoning methods (yellow) enrich the knowledge that results from reading by, for example, noting two genes that are annotated to the same ontology term or database entry.  All knowledge sources, read or reasoned, are assigned a reliability score, and all are combined using that score into a knowledge network (orange) that represents the integration of all sorts of relationship between a pair of genes and a combined reliability score.  A data network (also orange) is created from experimental results to be analyzed.  The reporting modules (pink) integrate the data and knowledge networks, producing visualizations that can be queried with the associated drill-down tool."
+  ]
+}

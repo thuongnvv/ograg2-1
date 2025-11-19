@@ -1,0 +1,14 @@
+{
+  "id": "BFO:0000009",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000009",
+  "relationships": {
+    "is_a": [
+      "BFO:0000006"
+    ]
+  },
+  "label": "two-dimensional spatial region",
+  "examples": [
+    "an infinitely thin plane in space.",
+    "the surface of a sphere-shaped part of space"
+  ]
+}

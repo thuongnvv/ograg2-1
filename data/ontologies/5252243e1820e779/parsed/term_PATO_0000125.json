@@ -1,0 +1,11 @@
+{
+  "id": "PATO:0000125",
+  "uri": "http://purl.obolibrary.org/obo/PATO_0000125",
+  "relationships": {
+    "is_a": [
+      "BFO:0000019"
+    ]
+  },
+  "label": "mass",
+  "definition": "A physical quality that inheres in a bearer by virtue of the proportion of the bearer's amount of matter."
+}

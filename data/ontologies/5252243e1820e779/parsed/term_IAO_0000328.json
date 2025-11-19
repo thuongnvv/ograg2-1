@@ -1,0 +1,11 @@
+{
+  "id": "IAO:0000328",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000328",
+  "relationships": {
+    "is_a": [
+      "IAO:0000306"
+    ]
+  },
+  "label": "table of figures",
+  "definition": "A table that relates figures in a document to specific locations in that document (usually page numbers).  This is also a document part (subsumption there should be inferred)."
+}

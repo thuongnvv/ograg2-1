@@ -1,0 +1,13 @@
+{
+  "id": "BFO:0000038",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000038",
+  "relationships": {
+    "is_a": [
+      "BFO:0000008"
+    ]
+  },
+  "label": "one-dimensional temporal region",
+  "examples": [
+    "the temporal region during which a process occurs."
+  ]
+}

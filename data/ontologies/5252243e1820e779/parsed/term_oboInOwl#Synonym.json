@@ -1,0 +1,9 @@
+{
+  "id": "oboInOwl#Synonym",
+  "uri": "http://www.geneontology.org/formats/oboInOwl#Synonym",
+  "relationships": {
+    "is_a": [
+      "IAO:0000102"
+    ]
+  }
+}

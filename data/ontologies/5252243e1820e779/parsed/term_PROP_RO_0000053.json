@@ -1,0 +1,11 @@
+{
+  "id": "PROP:RO_0000053",
+  "uri": "http://purl.obolibrary.org/obo/RO_0000053",
+  "property_name": "RO_0000053",
+  "label": "bearer of",
+  "definition": "a relation between an independent continuant (the bearer) and a specifically dependent continuant (the dependent), in which the dependent specifically depends on the bearer for its existence",
+  "examples": [
+    "this apple is bearer of this red color",
+    "this vase is bearer of this fragility"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "IAO:0000181",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000181",
+  "relationships": {
+    "is_a": [
+      "IAO:0000038"
+    ]
+  },
+  "label": "Venn diagram",
+  "definition": "A Venn diagram is a report graph showing all hypothetically possible\nlogical relations between a finite collection of sets."
+}

@@ -1,0 +1,10 @@
+{
+  "id": "PROP:IAO_0000136",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000136",
+  "property_name": "IAO_0000136",
+  "label": "is about",
+  "examples": [
+    "This document is about information artifacts and their representations"
+  ],
+  "definition": "is_about is a (currently) primitive relation that relates an information artifact to an entity."
+}

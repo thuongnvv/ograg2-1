@@ -1,0 +1,7 @@
+{
+  "id": "PROP:IAO_0000418",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000418",
+  "property_name": "IAO_0000418",
+  "label": "is quality specification of",
+  "definition": "a relation between a data item and a quality of a material entity where the material entity is the specified output of a material transformation which achieves an objective specification that indicates the intended value of the specified quality."
+}

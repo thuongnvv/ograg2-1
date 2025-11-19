@@ -1,0 +1,9 @@
+# API Keys Template
+# Copy file này thành api_keys.yaml và điền API keys của bạn
+
+# MegaLLM API Key
+# Lấy tại: https://megallm.io/dashboard/api-keys
+MEGALLM_API_KEY: 'your-megallm-api-key-here'
+
+# Old Groq API (deprecated)
+# GROQ_API_KEY: 'gsk_your-groq-key-here'

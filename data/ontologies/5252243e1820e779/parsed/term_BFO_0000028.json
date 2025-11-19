@@ -1,0 +1,14 @@
+{
+  "id": "BFO:0000028",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000028",
+  "relationships": {
+    "is_a": [
+      "BFO:0000006"
+    ]
+  },
+  "label": "three-dimensional spatial region",
+  "examples": [
+    "a cube-shaped region of space",
+    "a sphere-shaped region of space,"
+  ]
+}

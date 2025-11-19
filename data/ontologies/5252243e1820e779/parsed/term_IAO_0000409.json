@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000409",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000409",
+  "relationships": {
+    "is_a": [
+      "IAO:0000102"
+    ]
+  },
+  "label": "denotator type",
+  "definition": "A denotator type indicates how a term should be interpreted from an ontological perspective.",
+  "examples": [
+    "The Basic Formal Ontology ontology makes a distinction between Universals and defined classes, where the formal are \"natural kinds\" and the latter arbitrary collections of entities."
+  ]
+}

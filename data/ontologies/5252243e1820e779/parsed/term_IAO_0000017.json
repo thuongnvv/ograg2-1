@@ -1,0 +1,11 @@
+{
+  "id": "IAO:0000017",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000017",
+  "relationships": {
+    "is_a": [
+      "IAO:0000028"
+    ]
+  },
+  "label": "model number",
+  "definition": "A model number is an information content entity specifically borne by catalogs, design specifications, advertising materials, inventory systems and similar  that is about manufactured objects of the same class. The model number is an alternative term for the class. The manufactered objects may or may not also bear the model number. Model numbers can be encoded in a variety of other information objects, such as bar codes, numerals, or patterns of dots."
+}

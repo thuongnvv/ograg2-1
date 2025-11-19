@@ -1,0 +1,7 @@
+{
+  "id": "PROP:IAO_0000411",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000411",
+  "property_name": "IAO_0000411",
+  "label": "is denotator type",
+  "definition": "relates an class defined in an ontology, to the type of it's denotator"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "PROP:type",
+  "uri": "http://purl.org/dc/elements/1.1/type",
+  "property_name": "type",
+  "label": "Resource Type",
+  "comments": [
+    "The nature or genre of the content of the resource."
+  ]
+}

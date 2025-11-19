@@ -1,0 +1,11 @@
+{
+  "id": "IAO:0000593",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000593",
+  "relationships": {
+    "is_a": [
+      "IAO:0000010"
+    ]
+  },
+  "label": "software library",
+  "definition": "A software library is software composed of a collection of software modules and/or software methods in a form that can be statically or dynamically linked to some software application."
+}

@@ -1,0 +1,16 @@
+{
+  "id": "IAO:0000178",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000178",
+  "relationships": {
+    "is_a": [
+      "BFO:0000040"
+    ]
+  },
+  "label": "material information bearer",
+  "definition": "A material entity in which a concretization of an information content entity inheres.",
+  "examples": [
+    "A page of a paperback novel with writing on it. The paper itself is a material information bearer, the pattern of ink is the information carrier.",
+    "a brain",
+    "a hard drive"
+  ]
+}

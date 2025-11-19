@@ -1,0 +1,7 @@
+{
+  "id": "PROP:BFO_0000179",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000179",
+  "property_name": "BFO_0000179",
+  "label": "BFO OWL specification label",
+  "definition": "Relates an entity in the ontology to the name of the variable that is used to represent it in the code that generates the BFO OWL file from the lispy specification."
+}

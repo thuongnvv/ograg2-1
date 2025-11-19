@@ -1,0 +1,11 @@
+{
+  "id": "OBI:0000011",
+  "uri": "http://purl.obolibrary.org/obo/OBI_0000011",
+  "relationships": {
+    "is_a": [
+      "BFO:0000015"
+    ]
+  },
+  "label": "planned process",
+  "definition": "A processual entity that realizes a plan which is the concretization of a plan specification."
+}

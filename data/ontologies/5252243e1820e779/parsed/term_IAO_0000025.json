@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000025",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000025",
+  "relationships": {
+    "is_a": [
+      "IAO:0000104"
+    ]
+  },
+  "label": "programming language",
+  "definition": "A language in which source code is written that is intended to be executed/run by a software interpreter. Programming languages are ways to write instructions that specify what to do, and sometimes, how to do it.",
+  "examples": [
+    "R, Perl, Java"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000079",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000079",
+  "relationships": {
+    "is_a": [
+      "IAO:0000038"
+    ]
+  },
+  "label": "density plot",
+  "definition": "A density plot is a report graph which is a graphical representation of data where the tint of a particular pixel corresponds to some kind of function corresponding the the amount of data points relativelly with their distance from the the pixel.",
+  "examples": [
+    "Density plot of SSC-H and FSC-H."
+  ]
+}

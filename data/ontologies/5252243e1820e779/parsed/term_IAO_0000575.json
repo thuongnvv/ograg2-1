@@ -1,0 +1,21 @@
+{
+  "id": "IAO:0000575",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000575",
+  "relationships": {
+    "is_a": [
+      "OBI:0000011"
+    ],
+    "RO 0000057": [
+      "IAO:0000579"
+    ],
+    "OBI 0000293": [
+      "IAO:0000030",
+      "IAO:0000577"
+    ]
+  },
+  "label": "associating information with a centrally registered identifier in its registry",
+  "examples": [
+    "Articles in Pubmed are reviewed by curators who add MESH terms to the Pubmed records in order to categorize them better and improve the ability to search for them."
+  ],
+  "definition": "A planned process in which a CRID registry associates an information content entity with a CRID symbol"
+}

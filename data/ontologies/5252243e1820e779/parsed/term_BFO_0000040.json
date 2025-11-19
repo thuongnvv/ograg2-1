@@ -1,0 +1,25 @@
+{
+  "id": "BFO:0000040",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000040",
+  "relationships": {
+    "is_a": [
+      "BFO:0000004"
+    ]
+  },
+  "label": "material entity",
+  "definition": "An independent continuant that is spatially extended whose identity is independent of that of other entities and can be maintained through time.",
+  "examples": [
+    "a flame",
+    "a forest fire",
+    "a human being",
+    "a hurricane",
+    "a photon",
+    "a puff of smoke",
+    "a sea wave",
+    "a tornado",
+    "an aggregate of human beings.",
+    "an energy wave",
+    "an epidemic",
+    "the undetached arm of a human being"
+  ]
+}

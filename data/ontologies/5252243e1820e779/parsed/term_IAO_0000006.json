@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000006",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000006",
+  "relationships": {
+    "is_a": [
+      "IAO:0000030"
+    ]
+  },
+  "label": "narrative object",
+  "definition": "A narrative object is an information content entity that is a set of propositions.",
+  "examples": [
+    "Examples of narrative objects are reports, journal  articles, and patents submission."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "id": "PROP:IAO_0000581",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000581",
+  "property_name": "IAO_0000581",
+  "label": "has time stamp",
+  "definition": "relates a time stamped measurement datum to the time measurement datum that denotes the time when the measurement was taken"
+}

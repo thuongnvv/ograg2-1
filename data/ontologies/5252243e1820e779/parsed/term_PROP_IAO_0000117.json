@@ -1,0 +1,7 @@
+{
+  "id": "PROP:IAO_0000117",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000117",
+  "property_name": "IAO_0000117",
+  "label": "term editor",
+  "definition": "Name of editor entering the term in the file. The term editor is a point of contact for information regarding the term. The term editor may be, but is not always, the author of the definition, which may have been worked upon by several people"
+}

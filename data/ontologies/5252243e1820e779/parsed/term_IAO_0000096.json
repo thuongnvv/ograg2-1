@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000096",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000096",
+  "relationships": {
+    "is_a": [
+      "IAO:0000033"
+    ]
+  },
+  "label": "source code module",
+  "definition": "A source code module is a directive information entity that specifies, using a programming language, some algorithm.",
+  "examples": [
+    "The written source code that implements part of an algorithm. Test - if you know that it was written in a specific language, then it can be source code module. We mean here, roughly, the wording of a document such as a perl script."
+  ]
+}

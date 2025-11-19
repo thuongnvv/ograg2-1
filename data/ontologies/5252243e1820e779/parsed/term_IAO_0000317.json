@@ -1,0 +1,17 @@
+{
+  "id": "IAO:0000317",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000317",
+  "relationships": {
+    "is_a": [
+      "IAO:0000314"
+    ],
+    "IAO 0000136": [
+      "OBI:0500000"
+    ]
+  },
+  "label": "methods section",
+  "definition": "A part of a publication about an investigation that is about the study design of the investigation",
+  "examples": [
+    "The section labelled 'Methods' or 'Materials and Methods' in a typical scientific journal article."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "IAO:0000030",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000030",
+  "relationships": {
+    "is_a": [
+      "BFO:0000031"
+    ],
+    "IAO 0000136": [
+      "BFO:0000001"
+    ]
+  },
+  "label": "information content entity",
+  "definition": "A generically dependent continuant that is about some thing.",
+  "examples": [
+    "Examples of information content entites include journal articles, data, graphical layouts, and graphs."
+  ]
+}

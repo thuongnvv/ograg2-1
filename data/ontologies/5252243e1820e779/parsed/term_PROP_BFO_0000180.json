@@ -1,0 +1,7 @@
+{
+  "id": "PROP:BFO_0000180",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000180",
+  "property_name": "BFO_0000180",
+  "label": "BFO CLIF specification label",
+  "definition": "Relates an entity in the ontology to the term that is used to represent it in the the CLIF specification of BFO2"
+}

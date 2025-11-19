@@ -1,0 +1,9 @@
+{
+  "id": "PROP:format",
+  "uri": "http://purl.org/dc/elements/1.1/format",
+  "property_name": "format",
+  "label": "Format",
+  "comments": [
+    "The physical or digital manifestation of the resource."
+  ]
+}

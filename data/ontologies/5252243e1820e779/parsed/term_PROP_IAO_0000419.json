@@ -1,0 +1,7 @@
+{
+  "id": "PROP:IAO_0000419",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000419",
+  "property_name": "IAO_0000419",
+  "label": "quality is specified as",
+  "definition": "inverse of the relation of is quality specification of"
+}

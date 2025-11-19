@@ -1,0 +1,9 @@
+{
+  "id": "oboInOwl#Definition",
+  "uri": "http://www.geneontology.org/formats/oboInOwl#Definition",
+  "relationships": {
+    "is_a": [
+      "IAO:0000102"
+    ]
+  }
+}

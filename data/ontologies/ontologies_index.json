@@ -1,0 +1,50 @@
+{
+  "5252243e1820e779": {
+    "id": "5252243e1820e779",
+    "name": "iao",
+    "original_filename": "temp_upload.owl",
+    "file_hash": "5252243e1820e779525080d24236548376a2b558225cefdabee647ee468bbd75",
+    "status": "ready",
+    "created_at": "2025-11-19T08:56:47.909950",
+    "updated_at": "2025-11-19T08:57:49.395727",
+    "directory": "data/ontologies/5252243e1820e779",
+    "owl_file": "data/ontologies/5252243e1820e779/ontology.owl",
+    "parsed_dir": "data/ontologies/5252243e1820e779/parsed",
+    "error_message": null,
+    "metadata": {
+      "ontology_name": "IAO",
+      "id_prefix": "IAO",
+      "total_terms": 176,
+      "active_terms": 160,
+      "obsolete_terms": 16,
+      "relationships": [
+        "IAO 0000039",
+        "IAO 0000136",
+        "IAO 0000219",
+        "IAO 0000221",
+        "IAO 0000581",
+        "IAO 0000583",
+        "OBI 0000293",
+        "OBI 0000299",
+        "RO 0000057",
+        "has_part",
+        "is_a",
+        "part_of"
+      ],
+      "namespaces": [],
+      "parsed_date": null,
+      "hypergraph": {
+        "model": "sentence-transformers/all-MiniLM-L6-v2",
+        "total_facts": 572,
+        "total_hypernodes": 4154,
+        "embedding_dim": 384,
+        "files": {
+          "facts": "hypergraph_facts.pkl",
+          "hypernodes": "hypergraph_nodes.pkl",
+          "key_embeddings": "hypernode_key_embeddings.npy",
+          "value_embeddings": "hypernode_value_embeddings.npy"
+        }
+      }
+    }
+  }
+}

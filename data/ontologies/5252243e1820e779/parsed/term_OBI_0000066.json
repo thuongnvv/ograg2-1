@@ -1,0 +1,11 @@
+{
+  "id": "OBI:0000066",
+  "uri": "http://purl.obolibrary.org/obo/OBI_0000066",
+  "relationships": {
+    "is_a": [
+      "OBI:0000011"
+    ]
+  },
+  "label": "investigation",
+  "definition": "a planned process that consists of parts: planning, study design execution, documentation and which produce conclusion(s)."
+}

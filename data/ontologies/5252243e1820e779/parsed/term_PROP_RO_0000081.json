@@ -1,0 +1,10 @@
+{
+  "id": "PROP:RO_0000081",
+  "uri": "http://purl.obolibrary.org/obo/RO_0000081",
+  "property_name": "RO_0000081",
+  "label": "role of",
+  "definition": "a relation between a role and an independent continuant (the bearer), in which the role specifically depends on the bearer for its existence",
+  "examples": [
+    "this investigator role is a role of this person"
+  ]
+}

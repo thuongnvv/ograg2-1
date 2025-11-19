@@ -1,0 +1,7 @@
+{
+  "id": "PROP:IAO_0000112",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000112",
+  "property_name": "IAO_0000112",
+  "label": "example of usage",
+  "definition": "A phrase describing how a class name should be used. May also include other kinds of examples that facilitate immediate understanding of a class semantics, such as widely known prototypical subclasses or instances of the class. Although essential for high level terms, examples for low level terms (e.g., Affymetrix HU133 array) are not"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "IAO:0000573",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000573",
+  "relationships": {
+    "is_a": [
+      "IAO:0000038"
+    ]
+  },
+  "label": "line graph",
+  "definition": "A line graph is a type of graph created by connecting a series of data\npoints together with a line."
+}

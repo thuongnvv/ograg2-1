@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000311",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000311",
+  "relationships": {
+    "is_a": [
+      "IAO:0000310"
+    ]
+  },
+  "label": "publication",
+  "definition": "A document that has been accepted by a publisher",
+  "examples": [
+    "A journal article or book"
+  ]
+}

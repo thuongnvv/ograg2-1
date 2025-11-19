@@ -1,0 +1,15 @@
+{
+  "id": "BFO:0000034",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000034",
+  "relationships": {
+    "is_a": [
+      "BFO:0000016"
+    ]
+  },
+  "label": "function",
+  "examples": [
+    "the function of a hammer to drive in nails",
+    "the function of a heart pacemaker to regulate the beating of a heart through electricity",
+    "the function of amylase in saliva to break down starch into sugar"
+  ]
+}

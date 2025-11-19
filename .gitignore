@@ -1,0 +1,65 @@
+api_keys.yaml
+*.yaml.local
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+results/
+data/kg/*/onto_hypernode_embeddings.npy
+data/kg/*/summarized_texts.md
+
+# GO Ontology - Large files
+go-basic.owl
+data/kg/go/ontology/*.npy
+data/kg/go/ontology/*.pkl
+data/kg/*/hypergraph/*.pkl
+
+# Large CSV data files
+*.csv
+!requirements*.txt
+
+data/ontologies/*/parsed/*.npy
+data/ontologies/*/parsed/*.pkl
+# Keep metadata and index
+!data/ontologies/ontologies_index.json
+!data/ontologies/*/parsed/ontology_metadata.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+#Others
+clean_source.sh

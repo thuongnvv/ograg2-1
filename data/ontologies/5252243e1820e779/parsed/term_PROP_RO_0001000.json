@@ -1,0 +1,11 @@
+{
+  "id": "PROP:RO_0001000",
+  "uri": "http://purl.obolibrary.org/obo/RO_0001000",
+  "property_name": "RO_0001000",
+  "label": "derives from",
+  "definition": "a relation between two distinct material entities, the new entity and the old entity, in which the new entity begins to exist when the old entity ceases to exist, and the new entity inherits the significant portion of the matter of the old entity",
+  "examples": [
+    "this cell derives from this parent cell (cell division)",
+    "this nucleus derives from this parent nucleus (nuclear division)"
+  ]
+}

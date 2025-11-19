@@ -1,0 +1,11 @@
+{
+  "id": "IAO:0000594",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000594",
+  "relationships": {
+    "is_a": [
+      "IAO:0000010"
+    ]
+  },
+  "label": "software application",
+  "definition": "A software application is software that can be directly executed by some processing unit."
+}

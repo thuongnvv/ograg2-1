@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000323",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000323",
+  "relationships": {
+    "is_a": [
+      "IAO:0000314"
+    ]
+  },
+  "label": "author contributions section",
+  "definition": "A part of a publication that is about the specific contributions of each author",
+  "examples": [
+    "LH conceived of the hypothesis, designed the study and contributed to the writing of the manuscript.  KBC executed the experiments, analyzed the data, and contributed to the writing of the manuscript."
+  ]
+}

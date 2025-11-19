@@ -1,0 +1,9 @@
+{
+  "id": "PROP:subject",
+  "uri": "http://purl.org/dc/elements/1.1/subject",
+  "property_name": "subject",
+  "label": "Subject and Keywords",
+  "comments": [
+    "The topic of the content of the resource."
+  ]
+}

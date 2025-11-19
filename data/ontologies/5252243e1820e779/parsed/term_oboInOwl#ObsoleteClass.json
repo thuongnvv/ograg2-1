@@ -1,0 +1,10 @@
+{
+  "id": "oboInOwl#ObsoleteClass",
+  "uri": "http://www.geneontology.org/formats/oboInOwl#ObsoleteClass",
+  "relationships": {
+    "is_a": [
+      "owl#Thing"
+    ]
+  },
+  "label": "Obsolete Class"
+}

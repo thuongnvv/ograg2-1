@@ -1,0 +1,12 @@
+{
+  "id": "PROP:BFO_0000051",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000051",
+  "property_name": "BFO_0000051",
+  "label": "has part",
+  "definition": "a core relation that holds between a whole and its part",
+  "examples": [
+    "my body has part my brain (continuant parthood, two material entities)",
+    "my stomach has part my stomach cavity (continuant parthood, material entity has part immaterial entity)",
+    "this year has part this day (occurrent parthood)"
+  ]
+}

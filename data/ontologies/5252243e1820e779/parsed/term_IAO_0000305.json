@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000305",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000305",
+  "relationships": {
+    "is_a": [
+      "IAO:0000300"
+    ]
+  },
+  "label": "document title",
+  "definition": "A textual entity that names a document",
+  "examples": [
+    "Textual characteristics of traditional and Open Access scientific journals are similar"
+  ]
+}

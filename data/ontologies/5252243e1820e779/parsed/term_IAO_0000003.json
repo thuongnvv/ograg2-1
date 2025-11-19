@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000003",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000003",
+  "relationships": {
+    "is_a": [
+      "IAO:0000009"
+    ]
+  },
+  "label": "measurement unit label",
+  "definition": "A measurement unit label is as a label that is part of a scalar measurement datum and denotes a unit of measure.",
+  "examples": [
+    "Examples of measurement unit labels are liters, inches, weight per volume."
+  ]
+}

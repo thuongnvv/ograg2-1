@@ -1,0 +1,17 @@
+{
+  "id": "BFO:0000142",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000142",
+  "relationships": {
+    "is_a": [
+      "BFO:0000140"
+    ]
+  },
+  "label": "one-dimensional continuant fiat boundary",
+  "examples": [
+    "The Equator",
+    "all geopolitical boundaries",
+    "all lines of latitude and longitude",
+    "the line separating the outer surface of the mucosa of the lower lip from the outer surface of the skin of the chin.",
+    "the median sulcus of your tongue"
+  ]
+}

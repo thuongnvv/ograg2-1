@@ -1,0 +1,9 @@
+{
+  "id": "PROP:source",
+  "uri": "http://purl.org/dc/elements/1.1/source",
+  "property_name": "source",
+  "label": "Source",
+  "comments": [
+    "A reference to a resource from which the present resource\n         is derived."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "IAO:0000416",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000416",
+  "relationships": {
+    "is_a": [
+      "IAO:0000032"
+    ]
+  },
+  "label": "time measurement datum",
+  "definition": "A scalar measurement datum that is the result of measuring a temporal interval"
+}

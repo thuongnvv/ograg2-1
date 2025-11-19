@@ -1,0 +1,10 @@
+{
+  "id": "PROP:OBI_0000293",
+  "uri": "http://purl.obolibrary.org/obo/OBI_0000293",
+  "property_name": "OBI_0000293",
+  "label": "has_specified_input",
+  "definition": "A relation between a planned process and a continuant participating in that process that is not created during  the process. The presence of the continuant during the process is explicitly specified in the plan specification which the process realizes the concretization of.",
+  "examples": [
+    "see is_input_of example_of_usage"
+  ]
+}

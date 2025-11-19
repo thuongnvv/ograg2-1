@@ -1,0 +1,7 @@
+{
+  "id": "PROP:IAO_0000589",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000589",
+  "property_name": "IAO_0000589",
+  "label": "OBO foundry unique label",
+  "definition": "An alternative name for a class or property which is unique across the OBO Foundry."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "INST:IAO_0000224",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000224",
+  "instance_name": "IAO_0000224",
+  "label": "core",
+  "definition": "Core is an instance of a grouping of terms from an ontology or ontologies. It is used by the ontology to identify main classes."
+}

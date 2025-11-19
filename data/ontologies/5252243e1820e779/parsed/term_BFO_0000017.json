@@ -1,0 +1,18 @@
+{
+  "id": "BFO:0000017",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000017",
+  "relationships": {
+    "is_a": [
+      "BFO:0000020"
+    ]
+  },
+  "label": "realizable entity",
+  "definition": "A specifically dependent continuant  that inheres in continuant  entities and are not exhibited in full at every time in which it inheres in an entity or group of entities. The exhibition or actualization of a realizable entity is a particular manifestation, functioning or process that occurs under certain circumstances.",
+  "examples": [
+    "the disposition of this piece of metal to conduct electricity.",
+    "the disposition of your blood to coagulate",
+    "the function of your reproductive organs",
+    "the role of being a doctor",
+    "the role of this boundary to delineate where Utah and Colorado meet"
+  ]
+}

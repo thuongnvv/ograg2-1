@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000324",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000324",
+  "relationships": {
+    "is_a": [
+      "IAO:0000314"
+    ]
+  },
+  "label": "acknowledgements section",
+  "definition": "Part of a publication that is about the contributions of people or institutions other than the authors.",
+  "examples": [
+    "The authors wish to thank Alan Ruttenberg for his constructive comments about an earlier draft of this manuscript"
+  ]
+}

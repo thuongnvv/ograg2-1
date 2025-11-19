@@ -1,0 +1,7 @@
+{
+  "id": "PROP:OBI_0000312",
+  "uri": "http://purl.obolibrary.org/obo/OBI_0000312",
+  "property_name": "OBI_0000312",
+  "label": "is_specified_output_of",
+  "definition": "A relation between a planned process and a continuant participating in that process. The presence of the continuant at the end of the process is explicitly specified in the objective specification which the process realizes the concretization of."
+}

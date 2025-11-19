@@ -1,0 +1,11 @@
+{
+  "id": "UO:0000003",
+  "uri": "http://purl.obolibrary.org/obo/UO_0000003",
+  "relationships": {
+    "is_a": [
+      "IAO:0000003"
+    ]
+  },
+  "label": "time unit",
+  "definition": "A unit which is a standard measure of the dimension in which events occur in sequence."
+}

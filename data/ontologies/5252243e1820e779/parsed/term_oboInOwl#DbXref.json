@@ -1,0 +1,9 @@
+{
+  "id": "oboInOwl#DbXref",
+  "uri": "http://www.geneontology.org/formats/oboInOwl#DbXref",
+  "relationships": {
+    "is_a": [
+      "IAO:0000102"
+    ]
+  }
+}

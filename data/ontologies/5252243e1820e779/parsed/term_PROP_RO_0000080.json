@@ -1,0 +1,10 @@
+{
+  "id": "PROP:RO_0000080",
+  "uri": "http://purl.obolibrary.org/obo/RO_0000080",
+  "property_name": "RO_0000080",
+  "label": "quality of",
+  "definition": "a relation between a quality and an independent continuant (the bearer), in which the quality specifically depends on the bearer for its existence",
+  "examples": [
+    "this red color is a quality of this apple"
+  ]
+}

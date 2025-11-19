@@ -1,0 +1,10 @@
+{
+  "id": "BFO:0000146",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000146",
+  "relationships": {
+    "is_a": [
+      "BFO:0000140"
+    ]
+  },
+  "label": "two-dimensional continuant fiat boundary"
+}

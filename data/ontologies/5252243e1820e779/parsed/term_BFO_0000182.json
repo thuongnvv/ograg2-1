@@ -1,0 +1,10 @@
+{
+  "id": "BFO:0000182",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000182",
+  "relationships": {
+    "is_a": [
+      "BFO:0000015"
+    ]
+  },
+  "label": "history"
+}

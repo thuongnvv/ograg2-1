@@ -1,0 +1,6 @@
+{
+  "id": "PROP:IAO_0000602",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000602",
+  "property_name": "IAO_0000602",
+  "label": "has associated axiom(fol)"
+}

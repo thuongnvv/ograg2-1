@@ -1,0 +1,10 @@
+{
+  "id": "BFO:0000006",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000006",
+  "relationships": {
+    "is_a": [
+      "BFO:0000141"
+    ]
+  },
+  "label": "spatial region"
+}

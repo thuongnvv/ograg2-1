@@ -1,0 +1,16 @@
+{
+  "id": "BFO:0000031",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000031",
+  "relationships": {
+    "is_a": [
+      "BFO:0000002"
+    ]
+  },
+  "label": "generically dependent continuant",
+  "definition": "b is a generically dependent continuant = Def. b is a continuant that g-depends_on one or more other entities. (axiom label in BFO2 Reference: [074-001])",
+  "examples": [
+    "The entries in your database are patterns instantiated as quality instances in your hard drive. The database itself is an aggregate of such patterns. When you create the database you create a particular instance of the generically dependent continuant type database. Each entry in the database is an instance of the generically dependent continuant type IAO: information content entity.",
+    "the pdf file on your laptop, the pdf file that is a copy thereof on my laptop",
+    "the sequence of this protein molecule; the sequence that is a copy thereof in that protein molecule."
+  ]
+}

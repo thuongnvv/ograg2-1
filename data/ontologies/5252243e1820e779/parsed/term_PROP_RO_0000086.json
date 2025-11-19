@@ -1,0 +1,10 @@
+{
+  "id": "PROP:RO_0000086",
+  "uri": "http://purl.obolibrary.org/obo/RO_0000086",
+  "property_name": "RO_0000086",
+  "label": "has quality",
+  "definition": "a relation between an independent continuant (the bearer) and a quality, in which the quality specifically depends on the bearer for its existence",
+  "examples": [
+    "this apple has quality this red color"
+  ]
+}

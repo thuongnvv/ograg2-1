@@ -1,0 +1,25 @@
+{
+  "id": "BFO:0000027",
+  "uri": "http://purl.obolibrary.org/obo/BFO_0000027",
+  "relationships": {
+    "is_a": [
+      "BFO:0000040"
+    ]
+  },
+  "label": "object aggregate",
+  "examples": [
+    "a collection of cells in a blood biobank.",
+    "a swarm of bees is an aggregate of members who are linked together through natural bonds",
+    "a symphony orchestra",
+    "an organization is an aggregate whose member parts have roles of specific types (for example in a jazz band, a chess club, a football team)",
+    "defined by fiat: the aggregate of members of an organization",
+    "defined through physical attachment: the aggregate of atoms in a lump of granite",
+    "defined through physical containment: the aggregate of molecules of carbon dioxide in a sealed container",
+    "defined via attributive delimitations such as: the patients in this hospital",
+    "the aggregate of bearings in a constant velocity axle joint",
+    "the aggregate of blood cells in your body",
+    "the nitrogen atoms in the atmosphere",
+    "the restaurants in Palo Alto",
+    "your collection of Meissen ceramic plates."
+  ]
+}

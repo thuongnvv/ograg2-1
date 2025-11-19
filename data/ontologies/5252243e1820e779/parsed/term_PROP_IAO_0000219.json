@@ -1,0 +1,10 @@
+{
+  "id": "PROP:IAO_0000219",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000219",
+  "property_name": "IAO_0000219",
+  "label": "denotes",
+  "examples": [
+    "A person's name denotes the person. A variable name in a computer program denotes some piece of memory. Lexically equivalent strings can denote different things, for instance \"Alan\" can denote different people. In each case of use, there is a case of the denotation relation obtaining, between \"Alan\" and the person that is being named."
+  ],
+  "definition": "denotes is a primitive, instance-level, relation obtaining between an information content entity and some portion of reality. Denotation is what happens when someone creates an information content entity E in order to specifically refer to something. The only relation between E and the thing is that E can be used to 'pick out' the thing. This relation connects those two together. Freedictionary.com sense 3: To signify directly; refer to specifically"
+}

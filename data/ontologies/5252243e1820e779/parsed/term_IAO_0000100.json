@@ -1,0 +1,14 @@
+{
+  "id": "IAO:0000100",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000100",
+  "relationships": {
+    "is_a": [
+      "IAO:0000027"
+    ]
+  },
+  "label": "data set",
+  "definition": "A data item that is an aggregate of other data items of the same type that have something in common. Averages and distributions can be determined for data sets.",
+  "examples": [
+    "Intensity values in a CEL file or from multiple CEL files comprise a data set (as opposed to the CEL files themselves)."
+  ]
+}

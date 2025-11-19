@@ -1,0 +1,10 @@
+{
+  "id": "PROP:IAO_0000598",
+  "uri": "http://purl.obolibrary.org/obo/IAO_0000598",
+  "property_name": "IAO_0000598",
+  "label": "has ID policy for",
+  "definition": "Relating an ontology used to record id policy to the ontology namespace whose policy it manages",
+  "examples": [
+    "Ontology: <http://purl.obolibrary.org/obo/ro/idrange/>\n  Annotations: \n     'has ID prefix': \"http://purl.obolibrary.org/obo/RO_\"\n     'has ID digit count' : 7,\n     rdfs:label \"RO id policy\"\n     'has ID policy for': \"RO\""
+  ]
+}
