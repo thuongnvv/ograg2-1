@@ -1,7 +1,0 @@
-{
-  "id": "PROP:IAO_0000119",
-  "uri": "http://purl.obolibrary.org/obo/IAO_0000119",
-  "property_name": "IAO_0000119",
-  "label": "definition source",
-  "definition": "formal citation, e.g. identifier in external database to indicate / attribute source(s) for the definition. Free text indicate / attribute source(s) for the definition. EXAMPLE: Author Name, URI, MeSH Term C04, PUBMED ID, Wiki uri on 31.01.2007"
-}

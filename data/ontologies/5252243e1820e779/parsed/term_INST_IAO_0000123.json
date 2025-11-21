@@ -1,7 +1,0 @@
-{
-  "id": "INST:IAO_0000123",
-  "uri": "http://purl.obolibrary.org/obo/IAO_0000123",
-  "instance_name": "IAO_0000123",
-  "label": "metadata incomplete",
-  "definition": "Class is being worked on; however, the metadata (including definition) are not complete or sufficiently clear to the branch editors."
-}

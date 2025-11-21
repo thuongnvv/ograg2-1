@@ -1,9 +1,0 @@
-{
-  "id": "PROP:description",
-  "uri": "http://purl.org/dc/elements/1.1/description",
-  "property_name": "description",
-  "label": "Description",
-  "comments": [
-    "An account of the content of the resource."
-  ]
-}

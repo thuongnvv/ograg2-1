@@ -1,9 +1,0 @@
-{
-  "id": "PROP:language",
-  "uri": "http://purl.org/dc/elements/1.1/language",
-  "property_name": "language",
-  "label": "Language",
-  "comments": [
-    "A language of the intellectual content of the resource."
-  ]
-}

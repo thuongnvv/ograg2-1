@@ -1,179 +1,92 @@
-# 🧬 Universal Ontology Q&A System
+# Ontology Q&A System - Local Deployment
 
-**Upload any OWL ontology → Chat with AI**
-
-A production-ready web application that transforms any OWL ontology into an intelligent Q&A system using advanced retrieval-augmented generation (RAG) techniques.
+**100% local processing. No data transmitted externally.**
 
 ---
+## Hardware Requirements
 
-## 🚀 Quick Start
+### Minimum (Just for testing, in this case, LLM is very bad)
+*Target: TinyLlama or Llama 3.2 3B*
+- **RAM**: 8GB+
+- **GPU**: Optional (Runs on CPU or integrated graphics)
+- **Disk**: 10GB+ free space
 
-### 1. Install Dependencies
+### Recommended (For high-quality)
+*Target: Llama 3.3 70B *
+- **Nvidia GPU**: Dual RTX 3090/4090 (48GB VRAM total) or 1x A6000/A100.
+- **Apple Silicon**: Mac Studio/MacBook Pro with **64GB+ Unified Memory** (M1/M2/M3 Max or Ultra).
+- **CPU Only (Not Recommended)**
+- **Disk**: 100GB+ free space (Model requires ~43GB, plus space for Vector DB and OS).
+
+### Software
+- Python 3.8+
+- Ollama (Latest version)
+- Git
+
+## Quick Start
+
 ```bash
+# 1. Clone repository
+git clone <repository-url>
+cd ograg2-1
+
+# 2. Install dependencies
 pip install -r requirements.txt
+
+# 3. Setup local LLM (one-time, ~1-40GB download)
+./setup_ollama_dev.sh          # For fast testing, in this case, LLM is very bad (1GB)
+# OR
+./setup_ollama_production.sh   # High quality (40GB)
+
+# 4. Verify installation
+python test_ollama.py
+
+# 5. Run application
+streamlit run app.py --server.port 8501
 ```
 
-### 2. Test Installation
+Open `http://localhost:8501` to upload your OWL file and test with your private data.
+
+---
+
+## Key Points
+
+- **Data Privacy**: All processing runs locally on your infrastructure
+- **No Internet**: Only needed for initial model download, then fully offline
+- **Your Data**: Test with your actual proprietary ontologies
+- **Air-gapped**: Compatible with isolated environments after setup
+
+---
+
+## Configuration
+
+Edit `api_keys.yaml`:
+```yaml
+USE_OLLAMA: true
+OLLAMA_MODEL: "llama3.3:70b"              # High quality
+OLLAMA_EMBEDDING_MODEL: "nomic-embed-text"
+OLLAMA_BASE_URL: "http://localhost:11434"
+```
+
+Models:
+- `tinyllama` (600MB) - Testing
+- `llama3.3:70b` (40GB) - Production
+
+---
+
+## Requirements
+
+- Python 3.8+
+- 8GB RAM (for fast testing) or 64GB RAM (high-quality)
+- 50GB disk space
+
+---
+
+## Support
+
+Run verification tests:
 ```bash
-python test_dependencies.py
+python test_ollama.py        # Test local LLM
 ```
 
-### 3. Set API Key (Optional)
-```bash
-cp api_keys.yaml.template api_keys.yaml
-# Edit api_keys.yaml and add your OpenAI API key
-```
-
-### 4. Launch Application
-```bash
-streamlit run app.py
-```
-
-### 5. Use the System
-1. Open browser at `http://localhost:8501`
-2. Upload any OWL ontology file
-3. Wait for automatic processing (2-15 minutes)
-4. Start asking questions!
-
----
-
-## ✨ Key Features
-
-- 📤 **Universal**: Upload any OWL/OBO ontology file
-- 🚀 **Zero Configuration**: Automatic parsing and processing
-- 🤖 **AI-Powered**: Smart retrieval + LLM answer generation
-- 🎯 **Accurate**: Ontology-grounded responses (no hallucination)
-- 📊 **Multi-Ontology**: Manage multiple ontologies simultaneously
-- 🔍 **Smart Context**: Hierarchical expansion (5 main + 10 parent terms)
-
----
-
-## 📖 Example Use Cases
-
-### Biological Research
-- Upload **Gene Ontology** → Ask "What is DNA repair?"
-- Upload **ChEBI** → Ask "What is glucose?"
-- Upload **Human Phenotype Ontology** → Ask "What are symptoms of diabetes?"
-
-### Medical Domain
-- Upload **Disease Ontology** → Ask about disease classifications
-- Upload **SNOMED CT** → Ask about medical procedures
-
-### Any Domain
-- Upload **Environmental Ontology** → Ask about ecological terms
-- Upload **Chemical Ontologies** → Ask about molecular structures
-
----
-
-## 🏗️ System Architecture
-
-```
-Input: OWL File
-     ↓
-Parse: XML → Structured JSON (85-90% information retention)
-     ↓
-Build: Smart Chunking (4 types) → Hypergraph → Embeddings
-     ↓
-Query: Dual Ranking → Hierarchical Expansion → LLM Generation
-     ↓
-Output: Accurate, Grounded Answers
-```
-
-### Smart Chunking Strategy
-Each ontology term is intelligently split into:
-- **Core chunk**: ID, label, definition (highest priority)
-- **Synonyms chunk**: Alternative names and terms
-- **Relationships chunk**: Parent/child relationships and hierarchies  
-- **Details chunk**: Examples, comments, and additional metadata
-
-### Enhanced Retrieval Logic
-- **Top-5 main terms**: Most relevant to user query
-- **Up to 10 parent terms**: 2 parents per main term for hierarchical context
-- **Total context**: Maximum 15 terms (5 + 5×2) for comprehensive understanding
-
----
-
-## 📊 Performance
-
-| Ontology Size | Processing Time | Query Time | Context Size |
-|---------------|----------------|------------|--------------|
-| Small (~1K terms) | 2-3 minutes | 2-3 seconds | 5-15 terms |
-| Medium (~10K terms) | 5-10 minutes | 3-5 seconds | 5-15 terms |
-| Large (~50K terms) | 10-15 minutes | 3-6 seconds | 5-15 terms |
-
----
-
-## 🔧 Configuration
-
-### API Keys
-The system works in two modes:
-1. **With LLM API key**: Full Q&A with generated answers
-2. **Without API key**: Retrieval-only mode (returns relevant ontology terms)
-
-Supported LLM providers:
-- OpenAI (GPT-4, GPT-3.5)
-- MegaLLM (Llama models)
-
-### Embedding Models
-Default: `sentence-transformers/all-MiniLM-L6-v2` (fast, good quality)
-
----
-
-## 📁 Project Structure
-
-```
-├── app.py                          # Main web interface
-├── ontology_manager.py             # Multi-ontology management
-├── build_hypergraph.py             # Generic hypergraph builder
-├── scripts/parse_owl.py            # Universal OWL parser
-├── query_engine/generic_query_engine.py  # Query processing
-├── requirements.txt                # Complete dependencies
-├── api_keys.yaml.template         # API configuration
-└── data/ontologies/               # Ontology workspace
-```
-
----
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-**Processing stuck at "PARSING"**
-- Check OWL file format (must be valid XML)
-- Ensure file is OBO-formatted OWL
-
-**Out of memory during build**
-- Use smaller embedding model
-- Reduce batch size in `build_hypergraph.py`
-
-**No relevant answers**
-- Try rephrasing your question
-- Check if ontology contains relevant terms
-- Verify ontology was processed successfully
-
-**Only getting retrieval results (no LLM answers)**
-- Check API key configuration in `api_keys.yaml`
-- Verify API key is valid and has credit
-
----
-
-## 🎯 Technical Specifications
-
-| Metric | Value |
-|--------|-------|
-| Total Size | 268KB (without dependencies) |
-| Core Dependencies | 6 packages |
-| Processing Memory | ~1GB during build |
-| Information Retention | 85-90% of ontology content |
-| Supported Formats | OWL, OBO |
-| Query Response Time | 3-6 seconds |
-
----
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
----
-
-**Ready to transform your domain knowledge into an intelligent Q&A system!** 🚀
+Check logs if issues occur.

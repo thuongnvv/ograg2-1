@@ -25,23 +25,29 @@ from build_hypergraph import build_hypergraph
 from query_engine.generic_query_engine import GenericQueryEngine
 
 
-# Load API keys from environment or yaml file
-def load_api_keys():
-    """Load API keys from environment variables (HF Secrets) or api_keys.yaml"""
-    # Priority 1: Environment variables (for Hugging Face Spaces)
-    megallm_key = os.getenv('MEGALLM_API_KEY')
-    if megallm_key:
-        return {'MEGALLM_API_KEY': megallm_key}
+# Load configuration from yaml file
+def load_config():
+    """Load configuration from api_keys.yaml"""
+    # Default configuration
+    default_config = {
+        'USE_OLLAMA': True,
+        'OLLAMA_MODEL': 'llama3.3:70b',
+        'OLLAMA_EMBED_MODEL': 'nomic-embed-text',
+        'OLLAMA_BASE_URL': 'http://localhost:11434'
+    }
     
-    # Priority 2: Local yaml file (for development)
-    api_keys_file = Path(__file__).parent / "api_keys.yaml"
-    if api_keys_file.exists():
-        with open(api_keys_file, 'r') as f:
-            return yaml.safe_load(f)
+    # Try to load from yaml file
+    config_file = Path(__file__).parent / "api_keys.yaml"
+    if config_file.exists():
+        with open(config_file, 'r') as f:
+            config = yaml.safe_load(f)
+            if config:
+                # Merge with defaults
+                return {**default_config, **config}
     
-    return {}
+    return default_config
 
-API_KEYS = load_api_keys()
+CONFIG = load_config()
 
 
 # Page config
@@ -86,8 +92,17 @@ def process_ontology(ontology_id: str, owl_file: str, manager: OntologyManager):
         # Update status: building
         manager.update_status(ontology_id, ProcessingStatus.BUILDING)
         
-        # Build hypergraph
-        metadata = build_hypergraph(str(parsed_dir))
+        # Build hypergraph with Ollama support
+        use_ollama = CONFIG.get('USE_OLLAMA', True)
+        ollama_embed_model = CONFIG.get('OLLAMA_EMBED_MODEL', 'nomic-embed-text')
+        ollama_base_url = CONFIG.get('OLLAMA_BASE_URL', 'http://localhost:11434')
+        
+        metadata = build_hypergraph(
+            str(parsed_dir),
+            use_ollama=use_ollama,
+            ollama_model=ollama_embed_model,
+            ollama_base_url=ollama_base_url
+        )
         
         # Update metadata and status
         manager.update_metadata(ontology_id, metadata)
@@ -247,7 +262,7 @@ def chat_page():
                 Building the knowledge graph involves:
                 1. **Smart Chunking**: Splitting each term into chunks (core, synonyms, relationships, details)
                 2. **HyperNode Creation**: Creating searchable key-value pairs (~17 nodes per term)
-                3. **Embedding Generation**: Converting text to vectors using sentence-transformers
+                3. **Embedding Generation**: Converting text to vectors using Ollama (100% local, no data sent to internet)
                 
                 This can take a while depending on your ontology.
                 """)
@@ -273,13 +288,18 @@ def chat_page():
     if st.session_state.query_engine is None:
         with st.spinner("Loading query engine..."):
             parsed_dir = st.session_state.manager.get_parsed_dir(onto_id)
-            # Get API key from yaml file or environment
-            api_key = API_KEYS.get('MEGALLM_API_KEY') or os.getenv('MEGALLM_API_KEY')
+            
+            # Get configuration
+            use_ollama = CONFIG.get('USE_OLLAMA', True)
+            ollama_model = CONFIG.get('OLLAMA_MODEL', 'llama3.3:70b')
+            ollama_base_url = CONFIG.get('OLLAMA_BASE_URL', 'http://localhost:11434')
             
             try:
                 st.session_state.query_engine = GenericQueryEngine(
                     str(parsed_dir),
-                    megallm_api_key=api_key
+                    use_ollama=use_ollama,
+                    ollama_model=ollama_model,
+                    ollama_base_url=f"{ollama_base_url}/v1"
                 )
             except Exception as e:
                 st.error(f"Error loading engine: {e}")

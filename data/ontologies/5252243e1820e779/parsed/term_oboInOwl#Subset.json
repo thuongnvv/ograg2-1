@@ -1,9 +1,0 @@
-{
-  "id": "oboInOwl#Subset",
-  "uri": "http://www.geneontology.org/formats/oboInOwl#Subset",
-  "relationships": {
-    "is_a": [
-      "IAO:0000102"
-    ]
-  }
-}

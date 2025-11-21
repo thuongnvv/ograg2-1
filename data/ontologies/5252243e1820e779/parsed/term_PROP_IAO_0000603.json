@@ -1,7 +1,0 @@
-{
-  "id": "PROP:IAO_0000603",
-  "uri": "http://purl.obolibrary.org/obo/IAO_0000603",
-  "property_name": "IAO_0000603",
-  "label": "is allocated id range",
-  "definition": "Relates an ontology IRI to an (inclusive) range of IRIs in an OBO name space. The range is give as, e.g. \"IAO_0020000-IAO_0020999\""
-}

@@ -1,9 +1,35 @@
-# API Keys Template
-# Copy file này thành api_keys.yaml và điền API keys của bạn
+# Ollama Configuration Template
+# Copy this file to api_keys.yaml and configure
 
-# MegaLLM API Key
-# Lấy tại: https://megallm.io/dashboard/api-keys
-MEGALLM_API_KEY: 'your-megallm-api-key-here'
+# ============================================
+# Ollama - Local LLM for Data Privacy
+# ============================================
+# Ollama runs completely local, no data sent outside
+# Install: https://ollama.com/download
+# Start: ollama serve
 
-# Old Groq API (deprecated)
-# GROQ_API_KEY: 'gsk_your-groq-key-here'
+# Enable Ollama
+USE_OLLAMA: true
+
+# LLM Model for chat/Q&A
+# Download with: ollama pull <model>
+OLLAMA_MODEL: 'llama3.3:70b'  # Options: 'llama3.3:70b', 'llama3.2', 'mistral', 'qwen2.5'
+
+# Embedding Model for semantic search
+# Download with: ollama pull nomic-embed-text
+OLLAMA_EMBED_MODEL: 'nomic-embed-text'  # Options: 'nomic-embed-text', 'mxbai-embed-large'
+
+# Ollama Server URL (default: http://localhost:11434)
+OLLAMA_BASE_URL: 'http://localhost:11434'
+
+# ============================================
+# Quick Setup:
+# ============================================
+# Development (lightweight): ./setup_ollama_dev.sh
+# Production (high quality): ./setup_ollama_production.sh
+#
+# Or manual setup:
+# 1. ollama pull llama3.3:70b
+# 2. ollama pull nomic-embed-text
+# 3. ollama serve
+# ============================================

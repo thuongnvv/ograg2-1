@@ -1,7 +1,0 @@
-{
-  "id": "INST:IAO_0000421",
-  "uri": "http://purl.obolibrary.org/obo/IAO_0000421",
-  "instance_name": "IAO_0000421",
-  "label": "named class expression",
-  "definition": "A named class expression is a logical expression that is given a name. The name can be used in place of the expression."
-}

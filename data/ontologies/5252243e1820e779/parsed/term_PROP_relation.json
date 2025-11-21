@@ -1,9 +1,0 @@
-{
-  "id": "PROP:relation",
-  "uri": "http://purl.org/dc/elements/1.1/relation",
-  "property_name": "relation",
-  "label": "Relation",
-  "comments": [
-    "A reference to a related resource."
-  ]
-}

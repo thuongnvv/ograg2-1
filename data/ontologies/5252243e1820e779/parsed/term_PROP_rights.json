@@ -1,9 +1,0 @@
-{
-  "id": "PROP:rights",
-  "uri": "http://purl.org/dc/elements/1.1/rights",
-  "property_name": "rights",
-  "label": "Rights Management",
-  "comments": [
-    "Information about rights held in and over the resource."
-  ]
-}

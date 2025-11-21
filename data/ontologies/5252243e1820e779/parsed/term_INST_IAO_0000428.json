@@ -1,7 +1,0 @@
-{
-  "id": "INST:IAO_0000428",
-  "uri": "http://purl.obolibrary.org/obo/IAO_0000428",
-  "instance_name": "IAO_0000428",
-  "label": "requires discussion",
-  "definition": "A term that is metadata complete, has been reviewed, and problems have been identified that require discussion before release. Such a term requires editor note(s) to identify the outstanding issues."
-}

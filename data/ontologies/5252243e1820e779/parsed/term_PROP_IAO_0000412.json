@@ -1,7 +1,0 @@
-{
-  "id": "PROP:IAO_0000412",
-  "uri": "http://purl.obolibrary.org/obo/IAO_0000412",
-  "property_name": "IAO_0000412",
-  "label": "imported from",
-  "definition": "For external terms/classes, the ontology from which the term was imported"
-}

@@ -1,7 +1,0 @@
-{
-  "id": "PROP:IAO_0000232",
-  "uri": "http://purl.obolibrary.org/obo/IAO_0000232",
-  "property_name": "IAO_0000232",
-  "label": "curator note",
-  "definition": "An administrative note of use for a curator but of no use for a user"
-}

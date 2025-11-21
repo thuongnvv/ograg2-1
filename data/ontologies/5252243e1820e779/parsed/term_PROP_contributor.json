@@ -1,9 +1,0 @@
-{
-  "id": "PROP:contributor",
-  "uri": "http://purl.org/dc/elements/1.1/contributor",
-  "property_name": "contributor",
-  "label": "Contributor",
-  "comments": [
-    "An entity responsible for making contributions to the\n         content of the resource."
-  ]
-}

@@ -1,9 +1,0 @@
-{
-  "id": "PROP:date",
-  "uri": "http://purl.org/dc/elements/1.1/date",
-  "property_name": "date",
-  "label": "Date",
-  "comments": [
-    "A date associated with an event in the life cycle of the\n         resource."
-  ]
-}

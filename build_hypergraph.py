@@ -4,6 +4,8 @@ Generic HyperGraph Builder - Works with ANY parsed ontology!
 
 Auto-detects ontology structure and builds hypergraph accordingly.
 No configuration needed - just point to parsed ontology directory.
+
+Uses Ollama for 100% local embeddings - no data sent to internet!
 """
 
 import os
@@ -11,9 +13,9 @@ import sys
 import json
 import pickle
 import numpy as np
+import requests
 from pathlib import Path
 from tqdm import tqdm
-from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Any
 
 
@@ -164,17 +166,61 @@ def flatten_term_to_facts(term_data: Dict[str, Any], key_prefix: str) -> list:
     return facts
 
 
-def build_hypergraph(ontology_dir: str, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+def get_ollama_embeddings(texts: List[str], model: str = "nomic-embed-text", 
+                         base_url: str = "http://localhost:11434") -> np.ndarray:
+    """
+    Get embeddings from Ollama
+    
+    Args:
+        texts: List of texts to embed
+        model: Ollama embedding model name
+        base_url: Ollama server URL
+        
+    Returns:
+        Embeddings as numpy array
+    """
+    embeddings = []
+    
+    for text in tqdm(texts, desc=f"Getting embeddings from Ollama ({model})"):
+        try:
+            response = requests.post(
+                f"{base_url}/api/embeddings",
+                json={"model": model, "prompt": text},
+                timeout=30
+            )
+            response.raise_for_status()
+            embedding = response.json()['embedding']
+            embeddings.append(embedding)
+        except Exception as e:
+            print(f"Error getting embedding: {e}")
+            # Fallback to zero vector
+            embeddings.append([0.0] * 768)  # Default dimension
+    
+    return np.array(embeddings)
+
+
+def build_hypergraph(ontology_dir: str, model_name: str = "nomic-embed-text",
+                    use_ollama: bool = True, ollama_model: str = "nomic-embed-text",
+                    ollama_base_url: str = "http://localhost:11434"):
     """
     Build hypergraph from parsed ontology
     
     Args:
         ontology_dir: Directory containing parsed term JSON files
-        model_name: Embedding model (default: MiniLM for speed)
+        model_name: Model name (ignored, kept for compatibility)
+        use_ollama: Whether to use Ollama for embeddings (default: True, always True now)
+        ollama_model: Ollama embedding model (default: "nomic-embed-text")
+        ollama_base_url: Ollama server URL (default: "http://localhost:11434")
     """
     print(f"\n{'='*80}")
-    print(f"Generic HyperGraph Builder")
+    print(f"Generic HyperGraph Builder - 100% Local with Ollama")
     print(f"{'='*80}\n")
+    
+    # Force use_ollama to True for security
+    if not use_ollama:
+        print("⚠️  Warning: use_ollama=False is deprecated for security.")
+        print("   Forcing use_ollama=True to ensure no data leaves your machine.\n")
+        use_ollama = True
     
     # Load metadata
     print("Loading ontology metadata...")
@@ -189,10 +235,23 @@ def build_hypergraph(ontology_dir: str, model_name: str = "sentence-transformers
     print(f"  ✓ Terms: {total_terms}")
     print(f"  ✓ Relationships: {', '.join(metadata['relationships'])}")
     
-    # Load embedding model
-    print(f"\nLoading embedding model: {model_name}...")
-    model = SentenceTransformer(model_name)
-    print(f"  ✓ Model loaded (dim: {model.get_sentence_embedding_dimension()})\n")
+    # Use Ollama embeddings (100% local, no internet after model download)
+    print(f"\n🔐 Security: Using Ollama embeddings (100% local)")
+    print(f"  Model: {ollama_model}")
+    print(f"  Server: {ollama_base_url}")
+    
+    # Test connection
+    try:
+        response = requests.get(f"{ollama_base_url}/api/version", timeout=5)
+        print(f"  ✓ Ollama server connected")
+        print(f"  ✓ No data leaves your machine!\n")
+    except Exception as e:
+        print(f"  ✗ Cannot connect to Ollama server: {e}")
+        print(f"  Please run: ollama serve")
+        sys.exit(1)
+    
+    model = None  # Will use Ollama API instead
+    embed_dim = 768  # nomic-embed-text dimension
     
     # Load all term files
     ontology_files = sorted(Path(ontology_dir).glob("term_*.json"))
@@ -239,59 +298,14 @@ def build_hypergraph(ontology_dir: str, model_name: str = "sentence-transformers
     value_embeddings_list = []
     key_embeddings_list = []
     
-    # STEP 1: Encode VALUES
-    print(f"\n  Encoding VALUES - {num_chunks} chunks...")
-    for chunk_idx in tqdm(range(num_chunks), desc="VALUE chunks"):
-        start_idx = chunk_idx * chunk_size
-        end_idx = min((chunk_idx + 1) * chunk_size, len(hypernodes))
-        
-        chunk_values = hypernode_values[start_idx:end_idx]
-        
-        chunk_val_emb = model.encode(
-            chunk_values,
-            batch_size=32,
-            show_progress_bar=False,
-            normalize_embeddings=True
-        )
-        value_embeddings_list.append(chunk_val_emb)
-        
-        del chunk_values, chunk_val_emb
-        import gc
-        gc.collect()
-    
-    value_embeddings = np.vstack(value_embeddings_list)
+    # OLLAMA: Encode all at once (Ollama handles batching internally)
+    print(f"\n  Encoding VALUES with Ollama...")
+    value_embeddings = get_ollama_embeddings(hypernode_values, ollama_model, ollama_base_url)
     print(f"  ✓ Generated {len(value_embeddings):,} value embeddings")
     
-    del value_embeddings_list
-    import gc
-    gc.collect()
-    
-    # STEP 2: Encode KEYS
-    print(f"\n  Encoding KEYS - {num_chunks} chunks...")
-    for chunk_idx in tqdm(range(num_chunks), desc="KEY chunks"):
-        start_idx = chunk_idx * chunk_size
-        end_idx = min((chunk_idx + 1) * chunk_size, len(hypernodes))
-        
-        chunk_keys = hypernode_keys[start_idx:end_idx]
-        
-        chunk_key_emb = model.encode(
-            chunk_keys,
-            batch_size=32,
-            show_progress_bar=False,
-            normalize_embeddings=True
-        )
-        key_embeddings_list.append(chunk_key_emb)
-        
-        del chunk_keys, chunk_key_emb
-        import gc
-        gc.collect()
-    
-    key_embeddings = np.vstack(key_embeddings_list)
+    print(f"\n  Encoding KEYS with Ollama...")
+    key_embeddings = get_ollama_embeddings(hypernode_keys, ollama_model, ollama_base_url)
     print(f"  ✓ Generated {len(key_embeddings):,} key embeddings\n")
-    
-    del key_embeddings_list
-    import gc
-    gc.collect()
     
     # Save hypergraph
     output_dir = Path(ontology_dir)
@@ -321,7 +335,8 @@ def build_hypergraph(ontology_dir: str, model_name: str = "sentence-transformers
     
     # Update metadata with hypergraph info
     metadata['hypergraph'] = {
-        'model': model_name,
+        'model': ollama_model if use_ollama else model_name,
+        'use_ollama': use_ollama,
         'total_facts': len(all_facts),
         'total_hypernodes': len(hypernodes),
         'embedding_dim': key_embeddings.shape[1],
@@ -354,7 +369,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(
-        description="Generic HyperGraph Builder - Works with any parsed ontology"
+        description="Generic HyperGraph Builder - Works with any parsed ontology (100% local with Ollama)"
     )
     parser.add_argument(
         "--ontology-dir",
@@ -363,13 +378,30 @@ def main():
     )
     parser.add_argument(
         "--model",
-        default="sentence-transformers/all-MiniLM-L6-v2",
-        help="Embedding model (default: MiniLM for speed)"
+        default="nomic-embed-text",
+        help="Ollama embedding model (default: nomic-embed-text)"
+    )
+    parser.add_argument(
+        "--use-ollama",
+        action="store_true",
+        default=True,
+        help="Use Ollama for embeddings (default: True, always enabled for security)"
+    )
+    parser.add_argument(
+        "--ollama-base-url",
+        default="http://localhost:11434",
+        help="Ollama server URL (default: http://localhost:11434)"
     )
     
     args = parser.parse_args()
     
-    build_hypergraph(args.ontology_dir, args.model)
+    build_hypergraph(
+        args.ontology_dir, 
+        args.model,
+        use_ollama=True,  # Force True for security
+        ollama_model=args.model,
+        ollama_base_url=args.ollama_base_url
+    )
 
 
 if __name__ == "__main__":

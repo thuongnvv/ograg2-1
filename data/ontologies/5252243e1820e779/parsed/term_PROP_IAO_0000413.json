@@ -1,7 +1,0 @@
-{
-  "id": "PROP:IAO_0000413",
-  "uri": "http://purl.obolibrary.org/obo/IAO_0000413",
-  "property_name": "IAO_0000413",
-  "label": "is duration of",
-  "definition": "relates a process to a time-measurement-datum that represents the duration of the process"
-}

@@ -1,9 +1,0 @@
-{
-  "id": "PROP:creator",
-  "uri": "http://purl.org/dc/elements/1.1/creator",
-  "property_name": "creator",
-  "label": "Creator",
-  "comments": [
-    "An entity primarily responsible for making the content \n         of the resource."
-  ]
-}

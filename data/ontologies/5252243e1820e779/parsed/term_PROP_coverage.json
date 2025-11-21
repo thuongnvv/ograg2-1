@@ -1,9 +1,0 @@
-{
-  "id": "PROP:coverage",
-  "uri": "http://purl.org/dc/elements/1.1/coverage",
-  "property_name": "coverage",
-  "label": "Coverage",
-  "comments": [
-    "The extent or scope of the content of the resource."
-  ]
-}

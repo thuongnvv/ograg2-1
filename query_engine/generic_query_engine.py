@@ -6,30 +6,37 @@ Provides:
 - Dual ranking retrieval (key + value similarity)
 - Hierarchical expansion
 - LLM-based answer generation
+- 100% local with Ollama (no data sent to internet)
 """
 
 import os
 import json
 import pickle
 import numpy as np
+import requests
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 
 
 class GenericQueryEngine:
-    """Generic query engine for any ontology"""
+    """Generic query engine for any ontology - 100% local"""
     
-    def __init__(self, ontology_dir: str, megallm_api_key: Optional[str] = None):
+    def __init__(self, ontology_dir: str, 
+                 use_ollama: bool = True, ollama_model: str = "llama3.3:70b",
+                 ollama_base_url: str = "http://localhost:11434/v1"):
         """
         Initialize query engine
         
         Args:
             ontology_dir: Directory containing parsed ontology and hypergraph
-            megallm_api_key: Optional MegaLLM API key (for LLM generation)
+            use_ollama: Whether to use Ollama for local LLM (default: True)
+            ollama_model: Ollama model name (default: "llama3.3:70b")
+            ollama_base_url: Ollama API base URL (default: "http://localhost:11434/v1")
         """
         self.ontology_dir = Path(ontology_dir)
+        self.use_ollama = use_ollama
+        self.ollama_model = ollama_model
         
         # Load metadata
         metadata_file = self.ontology_dir / 'ontology_metadata.json'
@@ -51,20 +58,52 @@ class GenericQueryEngine:
         self.key_embeddings = np.load(self.ontology_dir / 'hypernode_key_embeddings.npy')
         self.value_embeddings = np.load(self.ontology_dir / 'hypernode_value_embeddings.npy')
         
-        # Load embedding model
+        # Load embedding configuration
         model_name = self.metadata['hypergraph']['model']
-        print(f"Loading embedding model: {model_name}...")
-        self.model = SentenceTransformer(model_name)
+        use_ollama_embeddings = self.metadata['hypergraph'].get('use_ollama', False)
         
-        # Setup MegaLLM client (OpenAI-compatible)
-        self.llm_client = None
-        if megallm_api_key:
-            self.llm_client = OpenAI(
-                api_key=megallm_api_key,
-                base_url="https://ai.megallm.io/v1"
+        self.use_ollama_embeddings = use_ollama_embeddings
+        self.embedding_model_name = model_name
+        self.ollama_base_url_raw = ollama_base_url.replace('/v1', '')  # Remove /v1 for embeddings API
+        
+        if use_ollama_embeddings:
+            print(f"🔐 Using Ollama embeddings: {model_name} (100% local)")
+            self.model = None
+        else:
+            raise ValueError(
+                "Non-Ollama embeddings are no longer supported for security.\n"
+                "Please rebuild your hypergraph with use_ollama=True"
             )
         
+        # Setup Ollama LLM client
+        self.llm_client = None
+        if use_ollama:
+            print(f"🔐 Using Ollama LLM: {ollama_model} (100% local)")
+            self.llm_client = OpenAI(
+                api_key="ollama",  # Ollama doesn't need API key
+                base_url=ollama_base_url
+            )
+        else:
+            print("Running in retrieval-only mode (no LLM)")
+        
         print(f"✓ Ready! ({len(self.facts):,} facts, {len(self.hypernodes):,} nodes)\n")
+    
+    def _get_embedding(self, text: str) -> np.ndarray:
+        """Get embedding for text using Ollama (100% local)"""
+        # Use Ollama embeddings API
+        try:
+            response = requests.post(
+                f"{self.ollama_base_url_raw}/api/embeddings",
+                json={"model": self.embedding_model_name, "prompt": text},
+                timeout=30
+            )
+            response.raise_for_status()
+            embedding = response.json()['embedding']
+            return np.array(embedding)
+        except Exception as e:
+            print(f"Error getting Ollama embedding: {e}")
+            # Fallback to zero vector
+            return np.zeros(768)
     
     def retrieve(self, query: str, top_k: int = 5, expand_hierarchy: bool = True) -> List[Dict[str, Any]]:
         """
@@ -83,12 +122,11 @@ class GenericQueryEngine:
         Returns:
             List of retrieved facts (merged by term) with scores
         """
-        # Encode query
-        query_embedding = self.model.encode(
-            query,
-            normalize_embeddings=True,
-            convert_to_numpy=True
-        )
+        # Encode query using Ollama (100% local)
+        query_embedding = self._get_embedding(query)
+        
+        # Normalize query embedding
+        query_embedding = query_embedding / (np.linalg.norm(query_embedding) + 1e-8)
         
         # Compute similarities
         key_scores = np.dot(self.key_embeddings, query_embedding)
@@ -348,8 +386,11 @@ INSTRUCTIONS:
 Answer:"""
         
         try:
+            # Use Ollama model
+            model = self.ollama_model  # e.g., "llama3.3:70b", "llama3.2", "mistral"
+            
             response = self.llm_client.chat.completions.create(
-                model="llama3.3-70b-instruct",
+                model=model,
                 messages=[
                     {"role": "system", "content": f"You are a precise {self.ontology_name} ontology expert. Only use provided information. Never hallucinate."},
                     {"role": "user", "content": prompt}

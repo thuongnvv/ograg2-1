@@ -1,7 +1,0 @@
-{
-  "id": "PROP:RO_0002351",
-  "uri": "http://purl.obolibrary.org/obo/RO_0002351",
-  "property_name": "RO_0002351",
-  "label": "has member",
-  "definition": "has member is a mereological relation between a collection and an item."
-}
