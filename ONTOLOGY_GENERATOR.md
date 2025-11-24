@@ -67,13 +67,6 @@ python ontology_generator.py --url https://example.com --domain "medicine"
 python ontology_generator.py --file doc.pdf --ollama --model llama3.3:70b
 ```
 
-## Branch Info
-
-- `main`: 100% local with Ollama (no internet after model download)
-- `feature/ontology-generator-api`: Uses OpenAI GPT-4 for ontology generation
-
-The API branch uses GPT-4 because generating valid OWL requires large, capable models. Small local models struggle with OWL/XML structure.
-
 ## Switch Back to Main
 
 ```bash

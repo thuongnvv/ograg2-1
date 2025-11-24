@@ -209,7 +209,7 @@ Do not include any explanations before or after the XML."""
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,  # Lower temperature for more structured output
-                max_tokens=4000
+                max_tokens=16000  # Increased for larger ontologies (was 4000)
             )
             
             owl_content = response.choices[0].message.content.strip()
