@@ -210,6 +210,12 @@ Do not include any explanations before or after the XML."""
             
             owl_content = response.choices[0].message.content.strip()
             
+            # Log token usage
+            if hasattr(response, 'usage'):
+                print(f"   Tokens - Input: {response.usage.prompt_tokens}, Output: {response.usage.completion_tokens}, Total: {response.usage.total_tokens}")
+                if response.choices[0].finish_reason:
+                    print(f"   Finish reason: {response.choices[0].finish_reason}")
+            
             # Extract XML if wrapped in markdown code blocks
             if "```xml" in owl_content:
                 owl_content = re.search(r'```xml\s*(.*?)\s*```', owl_content, re.DOTALL)
