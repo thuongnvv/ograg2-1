@@ -137,8 +137,11 @@ def generate_ontology_page():
         with open(api_keys_file, 'r') as f:
             api_keys = yaml.safe_load(f)
             api_key = api_keys.get('openai_api_key')
-            base_url = api_keys.get('openai_base_url')
-            model_name = api_keys.get('openai_model', 'gpt-4')
+            if api_key and api_key != "YOUR_OPENROUTER_API_KEY":
+                base_url = api_keys.get('openai_base_url')
+                model_name = api_keys.get('openai_model', 'gpt-4')
+            else:
+                api_key = None  # Invalid placeholder key
     
     # Determine mode
     if api_key:
@@ -147,7 +150,13 @@ def generate_ontology_page():
         else:
             st.info(f"✅ Using OpenAI {model_name}")
     else:
-        st.warning("⚠️ No API key found. Using Ollama (requires llama3.3:70b)")
+        st.warning("⚠️ No API key configured. Using Ollama (requires llama3.3:70b)")
+        st.info("""
+        **To use cloud LLM instead:**
+        1. Get free API key at [OpenRouter](https://openrouter.ai/)
+        2. Edit `api_keys.yaml` with your key
+        3. Reload this page
+        """)
         use_ollama = True
         model_name = CONFIG.get('OLLAMA_MODEL', 'llama3.3:70b')
     

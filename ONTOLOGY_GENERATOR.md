@@ -2,12 +2,30 @@
 
 ## Setup API Key
 
-Edit `api_keys.yaml`:
+**Recommended: OpenRouter (Free)**
+
+1. Get free API key at: https://openrouter.ai/
+2. Edit `api_keys.yaml`:
 ```yaml
-openai_api_key: "sk-your-actual-key-here"
+openai_api_key: "sk-or-v1-your-actual-key-here"
+openai_base_url: "https://openrouter.ai/api/v1"
+openai_model: "meta-llama/llama-3.3-70b-instruct"
 ```
 
-Get key from: https://platform.openai.com/api-keys
+**Why OpenRouter?**
+- ✅ Free credits for testing
+- ✅ No Cloudflare blocking
+- ✅ Access to multiple LLM providers
+- ✅ Pay-as-you-go pricing
+
+**Alternative: OpenAI (Paid)**
+```yaml
+openai_api_key: "sk-your-openai-key"
+openai_base_url: null
+openai_model: "gpt-4"
+```
+
+**Note:** MegaLLM/Kindo.ai may be blocked by Cloudflare when called from Python.
 
 ## Test Generation
 
