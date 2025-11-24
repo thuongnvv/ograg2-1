@@ -147,7 +147,7 @@ def generate_ontology_page():
     if not api_key:
         st.info("💡 Using embedded MegaLLM API key")
         api_key = "sk-mega-cfeefed3f8e0fc99bb83d0026d631532342a1c6543a782433c262d8248506399"
-        base_url = "https://llm.kindo.ai/v1"
+        base_url = "https://ai.megallm.io/v1"  # Official MegaLLM endpoint
         model_name = "llama3.3-70b-instruct"
     
     # Display mode
