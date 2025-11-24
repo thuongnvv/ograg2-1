@@ -53,8 +53,8 @@ class OntologyGenerator:
             # Support custom base URL for OpenAI-compatible APIs
             kwargs = {
                 "api_key": api_key,
-                "timeout": 120.0,
-                "max_retries": 3
+                "timeout": 6000.0,  # 10 minutes for large ontology generation
+                "max_retries": 5
             }
             if base_url:
                 kwargs["base_url"] = base_url
