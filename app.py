@@ -150,15 +150,29 @@ def generate_ontology_page():
         else:
             st.info(f"✅ Using OpenAI {model_name}")
     else:
-        st.warning("⚠️ No API key configured. Using Ollama (requires llama3.3:70b)")
-        st.info("""
-        **To use cloud LLM instead:**
-        1. Get free API key at [OpenRouter](https://openrouter.ai/)
-        2. Edit `api_keys.yaml` with your key
+        st.error("❌ No API key configured!")
+        st.markdown("""
+        **Option 1: Use Cloud LLM (Recommended)**
+        1. Get free API key at [OpenRouter](https://openrouter.ai/) ($5 free credits)
+        2. Edit `api_keys.yaml`:
+        ```yaml
+        openai_api_key: "sk-or-v1-your-key-here"
+        openai_base_url: "https://openrouter.ai/api/v1"
+        openai_model: "meta-llama/llama-3.3-70b-instruct"
+        ```
         3. Reload this page
+        
+        **Option 2: Use Local Ollama (Advanced)**
+        1. Install Ollama: `curl -fsSL https://ollama.com/install.sh | sh`
+        2. Pull model: `ollama pull llama3.3:70b` (40GB download!)
+        3. Leave `api_keys.yaml` with placeholder key
+        4. Reload this page
         """)
         use_ollama = True
         model_name = CONFIG.get('OLLAMA_MODEL', 'llama3.3:70b')
+        
+        # Don't continue without proper setup
+        st.stop()
     
     # Source selection
     st.markdown("---")
