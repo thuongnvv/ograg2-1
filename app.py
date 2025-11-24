@@ -145,10 +145,9 @@ def generate_ontology_page():
     
     # Fallback to embedded MegaLLM key
     if not api_key:
-        st.info("💡 Using embedded MegaLLM API key")
-        api_key = "sk-mega-cfeefed3f8e0fc99bb83d0026d631532342a1c6543a782433c262d8248506399"
-        base_url = "https://ai.megallm.io/v1"  # Official MegaLLM endpoint
-        model_name = "llama3.3-70b-instruct"
+        st.warning("⚠️ No API key found in api_keys.yaml. Please add your API key to continue.")
+        st.info("Edit `api_keys.yaml` and add your MegaLLM or other provider API key.")
+        st.stop()
     
     # Display mode
     if base_url:
