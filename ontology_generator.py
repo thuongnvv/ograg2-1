@@ -180,7 +180,9 @@ Your task:
 5. Add clear labels and definitions for all entities
 
 Technical requirements:
-- Valid OWL/XML syntax that can be parsed
+- CRITICAL: Generate well-formed XML - every opening tag must have a matching closing tag
+- Proper XML syntax: close all tags correctly (e.g., <owl:Class>...</owl:Class> or <owl:Class/>)
+- Valid OWL/XML that can be parsed without errors
 - Declare all required namespaces including xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
 - Use rdfs:label and rdfs:comment for every class and property
 - Sequential IDs: CLASS_001, CLASS_002, ... and PROP_001, PROP_002, ...
