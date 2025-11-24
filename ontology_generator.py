@@ -32,7 +32,8 @@ class OntologyGenerator:
                  api_key: str = None,
                  model: str = "gpt-4",
                  use_ollama: bool = False,
-                 ollama_base_url: str = "http://localhost:11434/v1"):
+                 ollama_base_url: str = "http://localhost:11434/v1",
+                 base_url: str = None):
         """
         Initialize generator
         
@@ -41,6 +42,7 @@ class OntologyGenerator:
             model: Model name (gpt-4, gpt-3.5-turbo, or Ollama model)
             use_ollama: Use Ollama instead of OpenAI API
             ollama_base_url: Ollama server URL (only if use_ollama=True)
+            base_url: Custom API base URL (for OpenAI-compatible APIs)
         """
         if use_ollama:
             self.llm_client = OpenAI(
@@ -50,7 +52,13 @@ class OntologyGenerator:
         else:
             if not api_key:
                 raise ValueError("api_key required when use_ollama=False")
-            self.llm_client = OpenAI(api_key=api_key)
+            # Support custom base URL for OpenAI-compatible APIs
+            kwargs = {"api_key": api_key}
+            if base_url:
+                kwargs["base_url"] = base_url
+                # Add timeout for external APIs
+                kwargs["timeout"] = 60.0
+            self.llm_client = OpenAI(**kwargs)
         
         self.model = model
         self.use_ollama = use_ollama

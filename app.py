@@ -127,6 +127,8 @@ def generate_ontology_page():
     
     # Check for API configuration
     api_key = None
+    base_url = None
+    model_name = "gpt-4"
     use_ollama = False
     
     # Try api_keys.yaml first
@@ -135,11 +137,15 @@ def generate_ontology_page():
         with open(api_keys_file, 'r') as f:
             api_keys = yaml.safe_load(f)
             api_key = api_keys.get('openai_api_key')
+            base_url = api_keys.get('openai_base_url')
+            model_name = api_keys.get('openai_model', 'gpt-4')
     
     # Determine mode
     if api_key:
-        st.info("✅ Using OpenAI GPT-4 for generation")
-        model_name = "gpt-4"
+        if base_url:
+            st.info(f"✅ Using {model_name} via {base_url}")
+        else:
+            st.info(f"✅ Using OpenAI {model_name}")
     else:
         st.warning("⚠️ No API key found. Using Ollama (requires llama3.3:70b)")
         use_ollama = True
@@ -188,7 +194,8 @@ def generate_ontology_page():
                     else:
                         generator = OntologyGenerator(
                             api_key=api_key,
-                            model=model_name
+                            model=model_name,
+                            base_url=base_url
                         )
                     
                     generated_result = generator.process_file(
@@ -229,7 +236,8 @@ def generate_ontology_page():
                     else:
                         generator = OntologyGenerator(
                             api_key=api_key,
-                            model=model_name
+                            model=model_name,
+                            base_url=base_url
                         )
                     
                     generated_result = generator.process_url(

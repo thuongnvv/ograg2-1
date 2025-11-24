@@ -20,6 +20,8 @@ def test_generator():
     
     # Check API key from multiple sources
     api_key = os.getenv("OPENAI_API_KEY")
+    base_url = None
+    model = "gpt-4"
     
     if not api_key:
         # Try api_keys.yaml
@@ -28,6 +30,8 @@ def test_generator():
             with open(api_keys_file, 'r') as f:
                 api_keys = yaml.safe_load(f)
                 api_key = api_keys.get('openai_api_key')
+                base_url = api_keys.get('openai_base_url')
+                model = api_keys.get('openai_model', 'gpt-4')
     
     if not api_key or api_key == "YOUR_OPENAI_API_KEY_HERE":
         print("❌ Error: OpenAI API key not configured")
@@ -39,11 +43,15 @@ def test_generator():
     
     # Initialize generator
     print("\n1. Initializing generator...")
+    print(f"   Model: {model}")
+    if base_url:
+        print(f"   Base URL: {base_url}")
     generator = OntologyGenerator(
         api_key=api_key,
-        model="gpt-4"
+        model=model,
+        base_url=base_url
     )
-    print("✅ Generator initialized (using OpenAI GPT-4)")
+    print("✅ Generator initialized")
     
     # Test with simple text
     print("\n2. Testing with sample text...")
