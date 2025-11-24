@@ -165,7 +165,7 @@ class OntologyGenerator:
         Returns:
             OWL/XML string
         """
-        prompt = f"""You are an expert ontology engineer. Analyze the following text and create a well-structured OWL ontology.
+        prompt = f"""You are an expert ontology engineer. Analyze the following text COMPREHENSIVELY and create a detailed, well-structured OWL ontology.
 
 Domain: {domain}
 
@@ -173,22 +173,26 @@ Text to analyze:
 {text}
 
 Instructions:
-1. Identify key concepts (classes) from the text
-2. Identify important properties and relationships
-3. Create hierarchical structure (subclass relationships)
-4. Add annotations (labels, definitions, comments)
+1. THOROUGHLY identify ALL key concepts (classes) from the text - aim for at least 20-50 classes for comprehensive coverage
+2. Identify ALL important properties and relationships between concepts
+3. Create deep hierarchical structure with multiple levels of subclass relationships
+4. Add detailed annotations (labels, definitions, comments) for every class and property
 5. Generate valid OWL/XML format
 
 Requirements:
-- Use meaningful IDs (e.g., CLASS_001, PROP_001)
-- Include rdfs:label for human-readable names
-- Include rdfs:comment or IAO:0000115 for definitions
-- Create proper class hierarchy with rdfs:subClassOf
-- Include object and data properties
+- Extract MAXIMUM information from the text - don't summarize, capture all important concepts
+- Use meaningful IDs (e.g., CLASS_001, PROP_001) with sequential numbering
+- Include rdfs:label for human-readable names for EVERY entity
+- Include rdfs:comment with detailed definitions for EVERY entity
+- Create comprehensive class hierarchy with rdfs:subClassOf
+- Include both object properties (relationships) and data properties (attributes)
 - Follow OBO Foundry best practices if applicable
 - Generate VALID XML that can be parsed
 - MUST declare xsd namespace: xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-- Use xsd:string, xsd:integer, xsd:boolean for datatype properties
+- Use xsd:string, xsd:integer, xsd:boolean, xsd:decimal for datatype properties
+
+IMPORTANT: Create a COMPREHENSIVE ontology that captures the full scope and detail of the document. 
+Do not create a minimal example - extract as much structured knowledge as possible.
 
 Output ONLY the complete OWL/XML file, starting with <?xml version="1.0"?>
 Do not include any explanations before or after the XML."""
