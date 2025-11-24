@@ -212,7 +212,18 @@ def generate_ontology_page():
                     st.success("✅ Ontology generated successfully!")
                     
                 except Exception as e:
-                    st.error(f"❌ Generation failed: {e}")
+                    error_msg = str(e)
+                    st.error(f"❌ Generation failed: {error_msg}")
+                    
+                    # Helpful tips
+                    if "PDF extraction failed" in error_msg or "corrupted" in error_msg.lower():
+                        st.info("""
+                        **💡 Tips for PDF files:**
+                        - Try a different PDF if this one is corrupted
+                        - Image-based (scanned) PDFs cannot be processed
+                        - Password-protected PDFs are not supported
+                        """)
+                    
                     if temp_file.exists():
                         temp_file.unlink()
     

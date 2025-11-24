@@ -64,11 +64,24 @@ class OntologyGenerator:
         self.use_ollama = use_ollama
     
     def extract_text_from_pdf(self, pdf_path: str) -> str:
-        """Extract text from PDF file"""
-        reader = PdfReader(pdf_path)
+        """Extract text from PDF file with fallback options"""
         text = ""
-        for page in reader.pages:
-            text += page.extract_text() + "\n"
+        try:
+            reader = PdfReader(pdf_path)
+            for page in reader.pages:
+                try:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+                except Exception as e:
+                    # Skip problematic pages
+                    continue
+        except Exception as e:
+            raise ValueError(f"Failed to read PDF: {e}")
+        
+        if not text.strip():
+            raise ValueError("No text could be extracted from PDF. It may be scanned/image-based or corrupted.")
+        
         return text.strip()
     
     def extract_text_from_docx(self, docx_path: str) -> str:
@@ -100,8 +113,16 @@ class OntologyGenerator:
                 
                 try:
                     text = self.extract_text_from_pdf(tmp_path)
+                except Exception as pdf_error:
+                    # Clean up and re-raise with helpful message
+                    Path(tmp_path).unlink(missing_ok=True)
+                    raise ValueError(
+                        f"PDF extraction failed: {pdf_error}. "
+                        "The PDF may be corrupted, password-protected, or image-based. "
+                        "Try downloading and uploading the file instead."
+                    )
                 finally:
-                    Path(tmp_path).unlink()
+                    Path(tmp_path).unlink(missing_ok=True)
                 
                 return text
             
