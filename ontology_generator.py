@@ -56,8 +56,19 @@ class OntologyGenerator:
             kwargs = {"api_key": api_key}
             if base_url:
                 kwargs["base_url"] = base_url
-                # Add timeout for external APIs
-                kwargs["timeout"] = 60.0
+                # Add timeout and proper configuration for external APIs
+                kwargs["timeout"] = 120.0
+                kwargs["max_retries"] = 3
+                # Add default headers for APIs like MegaLLM
+                import httpx
+                kwargs["http_client"] = httpx.Client(
+                    headers={
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    timeout=120.0,
+                )
             self.llm_client = OpenAI(**kwargs)
         
         self.model = model

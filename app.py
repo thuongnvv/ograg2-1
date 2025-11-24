@@ -143,45 +143,18 @@ def generate_ontology_page():
             else:
                 api_key = None
     
-    # No custom API key - show setup instructions
+    # Fallback to embedded MegaLLM key
     if not api_key:
-        st.warning("⚠️ Ontology generation requires API key")
-        st.markdown("""
-        **MegaLLM is blocked by Cloudflare when called from Python.**
-        
-        Please get a free API key:
-        
-        ### Option 1: OpenRouter (Recommended - $5 Free Credits)
-        1. Sign up at [openrouter.ai](https://openrouter.ai/)
-        2. Copy your API key
-        3. Edit `api_keys.yaml`:
-        ```yaml
-        openai_api_key: "sk-or-v1-your-key-here"
-        openai_base_url: "https://openrouter.ai/api/v1"
-        openai_model: "meta-llama/llama-3.3-70b-instruct"
-        ```
-        4. Reload this page
-        
-        ### Option 2: Groq (Free, Fast)
-        1. Sign up at [console.groq.com](https://console.groq.com/)
-        2. Copy your API key
-        3. Edit `api_keys.yaml`:
-        ```yaml
-        openai_api_key: "gsk_your-groq-key-here"
-        openai_base_url: "https://api.groq.com/openai/v1"
-        openai_model: "llama-3.3-70b-versatile"
-        ```
-        4. Reload this page
-        
-        Both options are **completely free** for testing!
-        """)
-        st.stop()
+        st.info("💡 Using embedded MegaLLM API key")
+        api_key = "sk-mega-cfeefed3f8e0fc99bb83d0026d631532342a1c6543a782433c262d8248506399"
+        base_url = "https://llm.kindo.ai/v1"
+        model_name = "llama3.3-70b-instruct"
     
     # Display mode
     if base_url:
-        st.info(f"✅ Using {model_name}")
+        st.success(f"✅ Using {model_name}")
     else:
-        st.info(f"✅ Using OpenAI {model_name}")
+        st.success(f"✅ Using OpenAI {model_name}")
     
     # Source selection
     st.markdown("---")
