@@ -187,6 +187,8 @@ Requirements:
 - Include object and data properties
 - Follow OBO Foundry best practices if applicable
 - Generate VALID XML that can be parsed
+- MUST declare xsd namespace: xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+- Use xsd:string, xsd:integer, xsd:boolean for datatype properties
 
 Output ONLY the complete OWL/XML file, starting with <?xml version="1.0"?>
 Do not include any explanations before or after the XML."""
@@ -203,7 +205,7 @@ Do not include any explanations before or after the XML."""
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,  # Lower temperature for more structured output
-                max_tokens=32000  # Increased for larger ontologies (was 4000)
+                max_tokens=65000  # Maximum for comprehensive ontologies from large documents
             )
             
             owl_content = response.choices[0].message.content.strip()
