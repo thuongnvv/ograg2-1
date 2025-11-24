@@ -1,35 +1,3 @@
-# Ollama Configuration Template
-# Copy this file to api_keys.yaml and configure
-
-# ============================================
-# Ollama - Local LLM for Data Privacy
-# ============================================
-# Ollama runs completely local, no data sent outside
-# Install: https://ollama.com/download
-# Start: ollama serve
-
-# Enable Ollama
-USE_OLLAMA: true
-
-# LLM Model for chat/Q&A
-# Download with: ollama pull <model>
-OLLAMA_MODEL: 'llama3.3:70b'  # Options: 'llama3.3:70b', 'llama3.2', 'mistral', 'qwen2.5'
-
-# Embedding Model for semantic search
-# Download with: ollama pull nomic-embed-text
-OLLAMA_EMBED_MODEL: 'nomic-embed-text'  # Options: 'nomic-embed-text', 'mxbai-embed-large'
-
-# Ollama Server URL (default: http://localhost:11434)
-OLLAMA_BASE_URL: 'http://localhost:11434'
-
-# ============================================
-# Quick Setup:
-# ============================================
-# Development (lightweight): ./setup_ollama_dev.sh
-# Production (high quality): ./setup_ollama_production.sh
-#
-# Or manual setup:
-# 1. ollama pull llama3.3:70b
-# 2. ollama pull nomic-embed-text
-# 3. ollama serve
-# ============================================
+openai_api_key: "YOUR_API_KEY_HERE"
+openai_base_url: "https://ai.megallm.io/v1"
+openai_model: "llama3.3-70b-instruct"
