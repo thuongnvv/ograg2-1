@@ -165,7 +165,10 @@ class OntologyGenerator:
         Returns:
             OWL/XML string
         """
-        prompt = f"""You are an expert ontology engineer. Analyze the following text COMPREHENSIVELY and create a detailed, well-structured OWL ontology.
+        # Estimate expected output size based on text length
+        estimated_classes = min(max(len(text) // 2000, 20), 100)  # 1 class per 2000 chars, min 20, max 100
+        
+        prompt = f"""You are an expert ontology engineer. Analyze the following {len(text)}-character text COMPREHENSIVELY and create a detailed, well-structured OWL ontology.
 
 Domain: {domain}
 
@@ -173,26 +176,29 @@ Text to analyze:
 {text}
 
 Instructions:
-1. THOROUGHLY identify ALL key concepts (classes) from the text - aim for at least 20-50 classes for comprehensive coverage
+1. THOROUGHLY identify ALL key concepts (classes) from the text
+   - Target: Extract at least {estimated_classes} classes (concepts/entities)
+   - Don't stop early - continue until you've captured all important concepts
 2. Identify ALL important properties and relationships between concepts
+   - Target: At least {estimated_classes // 2} properties
 3. Create deep hierarchical structure with multiple levels of subclass relationships
 4. Add detailed annotations (labels, definitions, comments) for every class and property
-5. Generate valid OWL/XML format
+5. Generate valid OWL/XML format with complete coverage
 
 Requirements:
-- Extract MAXIMUM information from the text - don't summarize, capture all important concepts
-- Use meaningful IDs (e.g., CLASS_001, PROP_001) with sequential numbering
+- Extract MAXIMUM information from the text - this is a {len(text)}-char document requiring comprehensive extraction
+- Use meaningful IDs (e.g., CLASS_001, CLASS_002, ..., PROP_001, PROP_002, ...)
 - Include rdfs:label for human-readable names for EVERY entity
 - Include rdfs:comment with detailed definitions for EVERY entity
 - Create comprehensive class hierarchy with rdfs:subClassOf
 - Include both object properties (relationships) and data properties (attributes)
-- Follow OBO Foundry best practices if applicable
 - Generate VALID XML that can be parsed
 - MUST declare xsd namespace: xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
 - Use xsd:string, xsd:integer, xsd:boolean, xsd:decimal for datatype properties
 
-IMPORTANT: Create a COMPREHENSIVE ontology that captures the full scope and detail of the document. 
-Do not create a minimal example - extract as much structured knowledge as possible.
+CRITICAL: This is a LARGE document ({len(text)} chars). Create a COMPREHENSIVE ontology with at least {estimated_classes} classes.
+DO NOT create a minimal 5-10 class example. Continue generating until the full document scope is captured.
+A proper ontology for this document should be several thousand lines of XML.
 
 Output ONLY the complete OWL/XML file, starting with <?xml version="1.0"?>
 Do not include any explanations before or after the XML."""
