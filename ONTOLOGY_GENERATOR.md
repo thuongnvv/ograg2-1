@@ -1,31 +1,38 @@
 # Ontology Generator - Quick Start
 
-## Setup API Key
+## Setup API Key (Required)
 
-**Recommended: OpenRouter (Free)**
+**MegaLLM/Kindo.ai is blocked by Cloudflare when called from Python.**
 
-1. Get free API key at: https://openrouter.ai/
-2. Edit `api_keys.yaml`:
+Choose one of these **FREE** options:
+
+### Option 1: OpenRouter (Recommended)
+
+**Free $5 credits, access to many models**
+
+1. Sign up: https://openrouter.ai/
+2. Get API key from dashboard
+3. Edit `api_keys.yaml`:
 ```yaml
 openai_api_key: "sk-or-v1-your-actual-key-here"
 openai_base_url: "https://openrouter.ai/api/v1"
 openai_model: "meta-llama/llama-3.3-70b-instruct"
 ```
 
-**Why OpenRouter?**
-- ✅ Free credits for testing
-- ✅ No Cloudflare blocking
-- ✅ Access to multiple LLM providers
-- ✅ Pay-as-you-go pricing
+### Option 2: Groq
 
-**Alternative: OpenAI (Paid)**
+**100% Free, very fast inference**
+
+1. Sign up: https://console.groq.com/
+2. Get API key from dashboard  
+3. Edit `api_keys.yaml`:
 ```yaml
-openai_api_key: "sk-your-openai-key"
-openai_base_url: null
-openai_model: "gpt-4"
+openai_api_key: "gsk_your-actual-key-here"
+openai_base_url: "https://api.groq.com/openai/v1"
+openai_model: "llama-3.3-70b-versatile"
 ```
 
-**Note:** MegaLLM/Kindo.ai may be blocked by Cloudflare when called from Python.
+Both options work perfectly and are completely free!
 
 ## Test Generation
 
