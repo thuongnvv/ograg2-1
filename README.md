@@ -5,12 +5,15 @@ RAG-based chat system for OWL ontologies with auto-generation capability.
 ## Quick Start
 
 ```bash
-# 1. Clone & install
+# 1. Clone & switch branch
 git clone <repository-url>
 cd ograg2-1
+git checkout feature/ontology-generator-api
+
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# 2. Run
+# 3. Run application
 streamlit run app.py
 ```
 
