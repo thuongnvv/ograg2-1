@@ -165,44 +165,37 @@ class OntologyGenerator:
         Returns:
             OWL/XML string
         """
-        # Estimate expected output size based on text length
-        estimated_classes = min(max(len(text) // 2000, 20), 100)  # 1 class per 2000 chars, min 20, max 100
-       
-        
-        prompt = f"""You are an expert ontology engineer. Analyze the following {len(text)}-character text COMPREHENSIVELY and create a detailed, well-structured OWL ontology.
+        prompt = f"""You are an expert ontology engineer. Create a comprehensive, well-structured OWL ontology from the following text.
 
 Domain: {domain}
 
-Text to analyze:
+Text:
 {text}
 
-Instructions:
-1. THOROUGHLY identify ALL key concepts (classes) from the text
-   - Target: Extract at least {estimated_classes} classes (concepts/entities)
-   - Don't stop early - continue until you've captured all important concepts
-2. Identify ALL important properties and relationships between concepts
-   - Target: At least {estimated_classes // 2} properties
-3. Create deep hierarchical structure with multiple levels of subclass relationships
-4. Add detailed annotations (labels, definitions, comments) for every class and property
-5. Generate valid OWL/XML format with complete coverage
+Your task:
+1. Extract all significant concepts as OWL classes
+2. Identify relationships between concepts as object properties
+3. Identify attributes and data fields as datatype properties
+4. Build meaningful class hierarchies using rdfs:subClassOf
+5. Add clear labels and definitions for all entities
 
-Requirements:
-- Extract MAXIMUM information from the text - this is a {len(text)}-char document requiring comprehensive extraction
-- Use meaningful IDs (e.g., CLASS_001, CLASS_002, ..., PROP_001, PROP_002, ...)
-- Include rdfs:label for human-readable names for EVERY entity
-- Include rdfs:comment with detailed definitions for EVERY entity
-- Create comprehensive class hierarchy with rdfs:subClassOf
-- Include both object properties (relationships) and data properties (attributes)
-- Generate VALID XML that can be parsed
-- MUST declare xsd namespace: xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-- Use xsd:string, xsd:integer, xsd:boolean, xsd:decimal for datatype properties
+Technical requirements:
+- Valid OWL/XML syntax that can be parsed
+- Declare all required namespaces including xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+- Use rdfs:label and rdfs:comment for every class and property
+- Sequential IDs: CLASS_001, CLASS_002, ... and PROP_001, PROP_002, ...
+- For datatype properties, use appropriate XSD types (xsd:string, xsd:integer, xsd:decimal, xsd:boolean, xsd:date)
 
-CRITICAL: This is a LARGE document ({len(text)} chars). Create a COMPREHENSIVE ontology with at least {estimated_classes} classes.
-DO NOT create a minimal 5-10 class example. Continue generating until the full document scope is captured.
-A proper ontology for this document should be several thousand lines of XML.
+Quality guidelines:
+- Comprehensiveness: capture the full scope of knowledge in the text
+- Depth: create multi-level hierarchies where appropriate
+- Precision: use accurate, domain-specific terminology
+- Completeness: don't summarize or create toy examples - extract all relevant information
 
-Output ONLY the complete OWL/XML file, starting with <?xml version="1.0"?>
-Do not include any explanations before or after the XML."""
+Output format:
+- Return ONLY the OWL/XML content
+- Start with <?xml version="1.0"?>
+- No explanations, comments, or markdown formatting"""
 
         print("🤖 Generating ontology with LLM...")
         print(f"   Model: {self.model}")
