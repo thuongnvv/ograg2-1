@@ -1,58 +1,31 @@
-# Ontology Generator - Quick Start
+# Ontology Generator
 
-## Setup API Key (Required)
+Auto-generate OWL ontologies from documents or URLs using LLM.
 
-**MegaLLM/Kindo.ai is blocked by Cloudflare when called from Python.**
-
-Choose one of these **FREE** options:
-
-### Option 1: OpenRouter (Recommended)
-
-**Free $5 credits, access to many models**
-
-1. Sign up: https://openrouter.ai/
-2. Get API key from dashboard
-3. Edit `api_keys.yaml`:
-```yaml
-openai_api_key: "sk-or-v1-your-actual-key-here"
-openai_base_url: "https://openrouter.ai/api/v1"
-openai_model: "meta-llama/llama-3.3-70b-instruct"
-```
-
-### Option 2: Groq
-
-**100% Free, very fast inference**
-
-1. Sign up: https://console.groq.com/
-2. Get API key from dashboard  
-3. Edit `api_keys.yaml`:
-```yaml
-openai_api_key: "gsk_your-actual-key-here"
-openai_base_url: "https://api.groq.com/openai/v1"
-openai_model: "llama-3.3-70b-versatile"
-```
-
-Both options work perfectly and are completely free!
-
-## Test Generation
-
-```bash
-python test_generator.py
-```
-
-## Use in Web UI
+## Quick Start
 
 ```bash
 streamlit run app.py
 ```
 
-Then:
-1. Click "🤖 Generate Ontology" in sidebar
-2. Upload PDF/DOCX or enter URL
-3. Add domain context (optional)
-4. Click "Generate"
-5. Review/edit OWL
-6. Download or process directly
+Click **"🤖 Generate Ontology"** in sidebar → Upload file or enter URL → Generate
+
+## Features
+
+- **Input**: PDF, DOCX, or web URLs
+- **LLM**: MegaLLM Llama 3.3 70B (embedded, no setup)
+- **Output**: Valid OWL/XML ontology
+- **Workflow**: Generate → Edit → Download → Process → Chat
+
+## Custom API (Optional)
+
+Edit `api_keys.yaml` to use other providers:
+
+```yaml
+openai_api_key: "your-key"
+openai_base_url: "https://api.provider.com/v1"
+openai_model: "model-name"
+```
 
 ## CLI Usage
 
@@ -62,13 +35,15 @@ python ontology_generator.py --file document.pdf --domain "biology"
 
 # From URL
 python ontology_generator.py --url https://example.com --domain "medicine"
-
-# Use Ollama instead (requires llama3.3:70b)
-python ontology_generator.py --file doc.pdf --ollama --model llama3.3:70b
 ```
 
-## Switch Back to Main
+## Architecture
 
-```bash
-git checkout main
 ```
+Document → Extract Text → LLM Analysis → OWL Generation → Validation → Integration
+```
+
+- **Extraction**: pypdf, python-docx, beautifulsoup4
+- **Generation**: MegaLLM API (temperature=0.3, max_tokens=16000)
+- **Validation**: XML parsing + OWL structure checks
+- **Integration**: Seamless with existing hypergraph pipeline
