@@ -165,10 +165,6 @@ class OntologyGenerator:
         Returns:
             OWL/XML string
         """
-        # Truncate text if too long (keep first 8000 chars for context)
-        if len(text) > 8000:
-            text = text[:8000] + "\n...[truncated]"
-        
         prompt = f"""You are an expert ontology engineer. Analyze the following text and create a well-structured OWL ontology.
 
 Domain: {domain}
