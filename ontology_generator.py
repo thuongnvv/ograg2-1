@@ -2,12 +2,10 @@
 """
 Ontology Generator - Auto-generate OWL from documents/URLs using LLM
 
-Supports:
-- PDF files
-- DOCX files
-- Web URLs
-
-Uses local LLM (Ollama) to analyze content and generate OWL ontology
+Features:
+- Extract text from PDF, DOCX, web URLs
+- Generate OWL ontology using LLM
+- Basic validation
 """
 
 import re
@@ -209,7 +207,7 @@ Do not include any explanations before or after the XML."""
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,  # Lower temperature for more structured output
-                max_tokens=16000  # Increased for larger ontologies (was 4000)
+                max_tokens=32000  # Increased for larger ontologies (was 4000)
             )
             
             owl_content = response.choices[0].message.content.strip()
