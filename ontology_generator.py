@@ -97,8 +97,17 @@ class OntologyGenerator:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
-            response = requests.get(url, timeout=30, headers=headers)
-            response.raise_for_status()
+            
+            # Try with SSL verification first
+            try:
+                response = requests.get(url, timeout=30, headers=headers)
+                response.raise_for_status()
+            except requests.exceptions.SSLError:
+                # Retry without SSL verification for sites with cert issues
+                import warnings
+                warnings.filterwarnings('ignore', message='Unverified HTTPS request')
+                response = requests.get(url, timeout=30, headers=headers, verify=False)
+                response.raise_for_status()
             
             # Check if it's a PDF
             content_type = response.headers.get('Content-Type', '').lower()
