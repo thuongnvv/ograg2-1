@@ -137,42 +137,23 @@ def generate_ontology_page():
         with open(api_keys_file, 'r') as f:
             api_keys = yaml.safe_load(f)
             api_key = api_keys.get('openai_api_key')
-            if api_key and api_key != "YOUR_OPENROUTER_API_KEY":
+            if api_key and api_key not in ["YOUR_OPENROUTER_API_KEY", "YOUR_API_KEY_HERE"]:
                 base_url = api_keys.get('openai_base_url')
                 model_name = api_keys.get('openai_model', 'gpt-4')
             else:
-                api_key = None  # Invalid placeholder key
+                api_key = None
     
-    # Determine mode
-    if api_key:
-        if base_url:
-            st.info(f"✅ Using {model_name} via {base_url}")
-        else:
-            st.info(f"✅ Using OpenAI {model_name}")
+    # Fallback to MegaLLM (same as chat engine)
+    if not api_key:
+        api_key = "sk-mega-cfeefed3f8e0fc99bb83d0026d631532342a1c6543a782433c262d8248506399"
+        base_url = "https://llm.kindo.ai/v1"
+        model_name = "llama3.3-70b-instruct"
+    
+    # Display mode
+    if base_url:
+        st.info(f"✅ Using {model_name}")
     else:
-        st.error("❌ No API key configured!")
-        st.markdown("""
-        **Option 1: Use Cloud LLM (Recommended)**
-        1. Get free API key at [OpenRouter](https://openrouter.ai/) ($5 free credits)
-        2. Edit `api_keys.yaml`:
-        ```yaml
-        openai_api_key: "sk-or-v1-your-key-here"
-        openai_base_url: "https://openrouter.ai/api/v1"
-        openai_model: "meta-llama/llama-3.3-70b-instruct"
-        ```
-        3. Reload this page
-        
-        **Option 2: Use Local Ollama (Advanced)**
-        1. Install Ollama: `curl -fsSL https://ollama.com/install.sh | sh`
-        2. Pull model: `ollama pull llama3.3:70b` (40GB download!)
-        3. Leave `api_keys.yaml` with placeholder key
-        4. Reload this page
-        """)
-        use_ollama = True
-        model_name = CONFIG.get('OLLAMA_MODEL', 'llama3.3:70b')
-        
-        # Don't continue without proper setup
-        st.stop()
+        st.info(f"✅ Using OpenAI {model_name}")
     
     # Source selection
     st.markdown("---")
