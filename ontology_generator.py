@@ -167,6 +167,7 @@ class OntologyGenerator:
         """
         # Estimate expected output size based on text length
         estimated_classes = min(max(len(text) // 2000, 20), 100)  # 1 class per 2000 chars, min 20, max 100
+       
         
         prompt = f"""You are an expert ontology engineer. Analyze the following {len(text)}-character text COMPREHENSIVELY and create a detailed, well-structured OWL ontology.
 
@@ -215,7 +216,7 @@ Do not include any explanations before or after the XML."""
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,  # Lower temperature for more structured output
-                max_tokens=65000  # Maximum for comprehensive ontologies from large documents
+                max_tokens=50000  # Maximum allowed by API (56000 limit, use 50000 for safety)
             )
             
             owl_content = response.choices[0].message.content.strip()
