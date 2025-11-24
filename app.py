@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-"""
-OG-RAG Web Interface
-
-Simple web UI for:
-1. Upload OWL file
-2. Auto-process (parse + build hypergraph)
-3. Chat with ontology
-"""
-
 import streamlit as st
 import os
 import sys
@@ -15,6 +5,7 @@ import time
 import threading
 import yaml
 from pathlib import Path
+from datetime import datetime
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -23,6 +14,7 @@ from ontology_manager import OntologyManager, ProcessingStatus
 from scripts.parse_owl import OWLParser
 from build_hypergraph import build_hypergraph
 from query_engine.generic_query_engine import GenericQueryEngine
+from ontology_generator import OntologyGenerator
 
 
 # Load configuration from yaml file
@@ -70,6 +62,12 @@ if 'query_engine' not in st.session_state:
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
+if 'page' not in st.session_state:
+    st.session_state.page = 'upload'  # 'upload' or 'generate'
+
+if 'generated_owl' not in st.session_state:
+    st.session_state.generated_owl = None
+
 
 def process_ontology(ontology_id: str, owl_file: str, manager: OntologyManager):
     """Background processing: parse + build hypergraph"""
@@ -111,6 +109,252 @@ def process_ontology(ontology_id: str, owl_file: str, manager: OntologyManager):
     except Exception as e:
         manager.update_status(ontology_id, ProcessingStatus.ERROR, str(e))
         print(f"Error processing ontology: {e}")
+
+
+def generate_ontology_page():
+    """Generate ontology from documents/URLs"""
+    st.title("🤖 Auto-Generate Ontology")
+    st.markdown("### Create OWL ontology from your documents or web pages")
+    
+    st.info("""
+    **How it works:**
+    1. Upload a document (PDF/DOCX) or provide a URL
+    2. LLM analyzes the content and generates an OWL ontology
+    3. Review and edit the generated ontology
+    4. Download for validation in Protégé (optional)
+    5. Process and chat with the ontology
+    """)
+    
+    # Check for API configuration
+    api_key = None
+    use_ollama = False
+    
+    # Try api_keys.yaml first
+    api_keys_file = Path("api_keys.yaml")
+    if api_keys_file.exists():
+        with open(api_keys_file, 'r') as f:
+            api_keys = yaml.safe_load(f)
+            api_key = api_keys.get('openai_api_key')
+    
+    # Determine mode
+    if api_key:
+        st.info("✅ Using OpenAI GPT-4 for generation")
+        model_name = "gpt-4"
+    else:
+        st.warning("⚠️ No API key found. Using Ollama (requires llama3.3:70b)")
+        use_ollama = True
+        model_name = CONFIG.get('OLLAMA_MODEL', 'llama3.3:70b')
+    
+    # Source selection
+    st.markdown("---")
+    st.markdown("### Step 1: Choose your source")
+    
+    source_type = st.radio(
+        "Source type:",
+        ["📄 Upload Document", "🌐 Web URL"],
+        horizontal=True
+    )
+    
+    domain = st.text_input(
+        "Domain context (optional)",
+        placeholder="e.g., biology, medical, environmental...",
+        help="Helps LLM understand the context"
+    )
+    
+    generated_result = None
+    
+    if source_type == "📄 Upload Document":
+        uploaded_file = st.file_uploader(
+            "Upload PDF or DOCX",
+            type=['pdf', 'docx', 'doc', 'txt'],
+            help="Upload a document to analyze"
+        )
+        
+        if uploaded_file and st.button("🤖 Generate Ontology", type="primary"):
+            with st.spinner(f"Analyzing document with {model_name}..."):
+                try:
+                    # Save temp file
+                    temp_file = Path(f"temp_{uploaded_file.name}")
+                    with open(temp_file, 'wb') as f:
+                        f.write(uploaded_file.read())
+                    
+                    # Initialize generator
+                    if use_ollama:
+                        generator = OntologyGenerator(
+                            use_ollama=True,
+                            model=model_name,
+                            ollama_base_url=f"{CONFIG.get('OLLAMA_BASE_URL', 'http://localhost:11434')}/v1"
+                        )
+                    else:
+                        generator = OntologyGenerator(
+                            api_key=api_key,
+                            model=model_name
+                        )
+                    
+                    generated_result = generator.process_file(
+                        str(temp_file),
+                        domain=domain or "general"
+                    )
+                    
+                    # Cleanup
+                    temp_file.unlink()
+                    
+                    # Store in session
+                    st.session_state.generated_owl = generated_result
+                    
+                    st.success("✅ Ontology generated successfully!")
+                    
+                except Exception as e:
+                    st.error(f"❌ Generation failed: {e}")
+                    if temp_file.exists():
+                        temp_file.unlink()
+    
+    else:  # Web URL
+        url = st.text_input(
+            "Enter web page URL",
+            placeholder="https://example.com/article",
+            help="Only single web page (not entire website)"
+        )
+        
+        if url and st.button("🤖 Generate Ontology", type="primary"):
+            with st.spinner(f"Analyzing web page with {model_name}..."):
+                try:
+                    # Initialize generator
+                    if use_ollama:
+                        generator = OntologyGenerator(
+                            use_ollama=True,
+                            model=model_name,
+                            ollama_base_url=f"{CONFIG.get('OLLAMA_BASE_URL', 'http://localhost:11434')}/v1"
+                        )
+                    else:
+                        generator = OntologyGenerator(
+                            api_key=api_key,
+                            model=model_name
+                        )
+                    
+                    generated_result = generator.process_url(
+                        url,
+                        domain=domain or "general"
+                    )
+                    
+                    # Store in session
+                    st.session_state.generated_owl = generated_result
+                    
+                    st.success("✅ Ontology generated successfully!")
+                    
+                except Exception as e:
+                    st.error(f"❌ Generation failed: {e}")
+    
+    # Display generated ontology if available
+    if st.session_state.generated_owl:
+        result = st.session_state.generated_owl
+        
+        st.markdown("---")
+        st.markdown("### Step 2: Review Generated Ontology")
+        
+        # Validation results
+        val = result['validation']
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Classes", val['class_count'])
+        with col2:
+            st.metric("Properties", val['property_count'])
+        with col3:
+            if val['valid']:
+                st.success("✅ Valid")
+            else:
+                st.warning("⚠️ Has Issues")
+        
+        if val['issues']:
+            with st.expander("⚠️ Validation Issues"):
+                for issue in val['issues']:
+                    st.warning(issue)
+        
+        # OWL content editor
+        st.markdown("#### Edit OWL Content")
+        st.caption("You can edit the ontology below before saving")
+        
+        edited_owl = st.text_area(
+            "OWL/XML Content",
+            value=result['owl_content'],
+            height=400,
+            help="Edit the generated OWL if needed"
+        )
+        
+        # Update if edited
+        if edited_owl != result['owl_content']:
+            st.session_state.generated_owl['owl_content'] = edited_owl
+            st.info("💾 Content modified (not saved yet)")
+        
+        # Action buttons
+        st.markdown("---")
+        st.markdown("### Step 3: Save or Process")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            # Download for Protégé
+            st.download_button(
+                label="📥 Download OWL",
+                data=edited_owl,
+                file_name=f"generated_ontology_{datetime.now().strftime('%Y%m%d_%H%M%S')}.owl",
+                mime="application/rdf+xml",
+                help="Download to validate in Protégé"
+            )
+        
+        with col2:
+            # Save and process
+            if st.button("💾 Save & Process", type="primary"):
+                try:
+                    # Save to temp file
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    owl_file = Path(f"generated_ontology_{timestamp}.owl")
+                    
+                    with open(owl_file, 'w', encoding='utf-8') as f:
+                        f.write(edited_owl)
+                    
+                    # Add to manager
+                    source_name = result.get('source_file', result.get('source_url', 'generated'))
+                    ontology_id = st.session_state.manager.add_ontology(
+                        str(owl_file),
+                        name=f"Generated from {source_name}"
+                    )
+                    
+                    owl_file.unlink()  # Clean up temp file
+                    
+                    st.session_state.current_ontology_id = ontology_id
+                    st.session_state.generated_owl = None  # Clear generated
+                    st.session_state.page = 'upload'  # Switch to upload page
+                    
+                    # Start processing
+                    onto_info = st.session_state.manager.get_ontology(ontology_id)
+                    owl_file_path = onto_info['owl_file']
+                    
+                    thread = threading.Thread(
+                        target=process_ontology,
+                        args=(ontology_id, owl_file_path, st.session_state.manager)
+                    )
+                    thread.daemon = True
+                    thread.start()
+                    
+                    st.success(f"✅ Saved! Processing ontology...")
+                    time.sleep(1)
+                    st.rerun()
+                    
+                except Exception as e:
+                    st.error(f"❌ Failed to save: {e}")
+        
+        with col3:
+            if st.button("🔄 Regenerate"):
+                st.session_state.generated_owl = None
+                st.rerun()
+        
+        with col4:
+            if st.button("❌ Cancel"):
+                st.session_state.generated_owl = None
+                st.session_state.page = 'upload'
+                st.rerun()
 
 
 def upload_page():
@@ -395,6 +639,21 @@ def main():
         st.markdown("**Ontology-Grounded RAG**")
         st.markdown("---")
         
+        # Page navigation
+        st.markdown("### Navigation")
+        page = st.radio(
+            "Choose action:",
+            ["📤 Upload Ontology", "🤖 Generate Ontology"],
+            key="page_nav"
+        )
+        
+        if page == "📤 Upload Ontology":
+            st.session_state.page = 'upload'
+        else:
+            st.session_state.page = 'generate'
+        
+        st.markdown("---")
+        
         ready_ontos = st.session_state.manager.get_ready_ontologies()
         st.metric("Ready Ontologies", len(ready_ontos))
         
@@ -428,6 +687,7 @@ def main():
         st.markdown("""
         OG-RAG enables Q&A with any ontology:
         - Upload OWL file
+        - Generate from documents
         - Auto-build knowledge graph
         - Chat with AI
         """)
@@ -435,6 +695,8 @@ def main():
     # Main content
     if st.session_state.current_ontology_id:
         chat_page()
+    elif st.session_state.page == 'generate':
+        generate_ontology_page()
     else:
         upload_page()
 
