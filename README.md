@@ -1,61 +1,31 @@
 # Ontology Q&A System
 
-RAG-based chat system for OWL ontologies with auto-generation capability.
+Auto-generate and query OWL ontologies using LLM.
 
-## Quick Start
+## Setup
 
 ```bash
-# 1. Clone & switch branch
 git clone <repository-url>
 cd ograg2-1
 git checkout feature/ontology-generator-api
-
-# 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Run application
+# Add API key
+cp api_keys.yaml.template api_keys.yaml
+nano api_keys.yaml  # Add your MegaLLM/Groq/OpenAI key
+
 streamlit run app.py
 ```
 
-Open `http://localhost:8501`
+## API Configuration
 
-## Features
-
-- **Auto-generate**: Create ontologies from PDF/DOCX/URLs using LLM
-- **Upload**: Process existing OWL files
-- **Chat**: Query ontologies with natural language
-- **Privacy**: Works with cloud API (MegaLLM) or local Ollama
-
-## Configuration
-
-`api_keys.yaml` (optional):
+Edit `api_keys.yaml`:
 
 ```yaml
-# Cloud API (default, embedded MegaLLM key)
-openai_api_key: "your-key"
+# MegaLLM (recommended)
+openai_api_key: "sk-mega-YOUR_KEY"
 openai_base_url: "https://ai.megallm.io/v1"
 openai_model: "llama3.3-70b-instruct"
-
-# OR Local Ollama
-USE_OLLAMA: true
-OLLAMA_MODEL: "llama3.3:70b"
-OLLAMA_BASE_URL: "http://localhost:11434"
 ```
 
-## Local Setup (Optional)
-
-For 100% offline deployment:
-
-```bash
-# Install Ollama
-./setup_ollama_production.sh    # 40GB download
-
-# Test
-python test_ollama.py
-```
-
-**Requirements**: 64GB RAM, 50GB disk for local deployment
-
-## Documentation
-
-- [Ontology Generator](ONTOLOGY_GENERATOR.md) - Auto-generate OWL from documents
+Options: [MegaLLM](https://megallm.io), [Groq](https://groq.com) (free), OpenAI, or local Ollama (see `ONTOLOGY_GENERATOR.md`).
