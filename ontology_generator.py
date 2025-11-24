@@ -78,11 +78,34 @@ class OntologyGenerator:
         return text.strip()
     
     def extract_text_from_url(self, url: str) -> str:
-        """Extract text from web page"""
+        """Extract text from web page or PDF URL"""
         try:
-            response = requests.get(url, timeout=30)
+            # Download with headers to avoid blocks
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+            response = requests.get(url, timeout=30, headers=headers)
             response.raise_for_status()
             
+            # Check if it's a PDF
+            content_type = response.headers.get('Content-Type', '').lower()
+            is_pdf = 'application/pdf' in content_type or url.lower().endswith('.pdf')
+            
+            if is_pdf:
+                # Save temporary PDF and extract text
+                import tempfile
+                with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
+                    tmp.write(response.content)
+                    tmp_path = tmp.name
+                
+                try:
+                    text = self.extract_text_from_pdf(tmp_path)
+                finally:
+                    Path(tmp_path).unlink()
+                
+                return text
+            
+            # Parse HTML
             soup = BeautifulSoup(response.content, 'lxml')
             
             # Remove script and style elements
