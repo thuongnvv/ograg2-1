@@ -6,69 +6,66 @@ Auto-generate and query OWL ontologies using LLM.
 
 Choose one of three setups:
 
-### Option 1: Cloud API (Recommended for Quick Start)
+### Option 1: Cloud API
 
 ```bash
 git clone <repository-url>
 cd ograg2-1
 git checkout feature/ontology-generator-api
-pip install -r requirements.txt
 
-# Setup API
-cp api_keys.yaml.template api_keys.yaml
-# Edit api_keys.yaml with your API key
+# Run setup script
+./setup_api.sh
+```
 
+Then edit `api_keys.yaml` with your API key and run:
+```bash
 streamlit run app.py
 ```
 
-**API Configuration** (`api_keys.yaml`):
-```yaml
-openai_api_key: "sk-mega-YOUR_KEY"
-openai_base_url: "https://ai.megallm.io/v1"
-openai_model: "llama3.3-70b-instruct"
-```
-
-**Pros:** Fast setup, no hardware requirements  
-**Cons:** Requires API key, costs $0.12-0.30/M tokens
+**Requirements:** Python 3.8+  
+**Models:** Cloud-based (MegaLLM/Groq/OpenAI)  
+**Cost:** $0.12-0.30/M tokens
 
 ---
 
-### Option 2: Local Ollama - Development (Lightweight)
+### Option 2: Local Ollama - Development
 
 ```bash
 git clone <repository-url>
 cd ograg2-1
 git checkout feature/ontology-generator-api
-pip install -r requirements.txt
 
-# Auto-setup lightweight models
+# Run setup script
 ./setup_ollama_dev.sh
+```
 
+Then run:
+```bash
 streamlit run app.py
 ```
 
 **Requirements:** 8GB RAM, 10GB disk  
-**Models:** TinyLlama (600MB) - fast but lower quality  
-**Pros:** Free, 100% private, works offline  
-**Cons:** Lower quality responses
+**Models:** TinyLlama (600MB)  
+**Cost:** Free
 
 ---
 
-### Option 3: Local Ollama - Production (High Quality)
+### Option 3: Local Ollama - Production
 
 ```bash
 git clone <repository-url>
 cd ograg2-1
 git checkout feature/ontology-generator-api
-pip install -r requirements.txt
 
-# Auto-setup production models
+# Run setup script
 ./setup_ollama_production.sh
+```
 
+Then run:
+```bash
 streamlit run app.py
 ```
 
 **Requirements:** 64GB RAM, 50GB disk  
-**Models:** Llama 3.3 70B (~40GB) - high quality  
-**Pros:** Free, 100% private, GPT-4 comparable quality  
-**Cons:** High hardware requirements, slower first run
+**Models:** Llama 3.3 70B (~40GB)  
+**Cost:** Free
