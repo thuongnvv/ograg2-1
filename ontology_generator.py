@@ -53,7 +53,7 @@ class OntologyGenerator:
             # Support custom base URL for OpenAI-compatible APIs
             kwargs = {
                 "api_key": api_key,
-                "timeout": 6000.0,  # 10 minutes for large ontology generation
+                "timeout": 6000.0,  
                 "max_retries": 5
             }
             if base_url:
@@ -165,39 +165,50 @@ class OntologyGenerator:
         Returns:
             OWL/XML string
         """
-        prompt = f"""You are an expert ontology engineer. Create a comprehensive, well-structured OWL ontology from the following text.
+        prompt = f"""You are an expert Ontology Engineer and Knowledge Graph Architect. Your task is to analyze the provided text and construct a high-quality, logically consistent OWL ontology in RDF/XML format.
 
-Domain: {domain}
+    Domain context: {domain}
 
-Text:
-{text}
+    Input Text:
+    {text}
 
-Your task:
-1. Extract all significant concepts as OWL classes
-2. Identify relationships between concepts as object properties
-3. Identify attributes and data fields as datatype properties
-4. Build meaningful class hierarchies using rdfs:subClassOf
-5. Add clear labels and definitions for all entities
+    ---
+    CORE TASK:
+    Transform the knowledge in the text into a formal ontology. You must strictly distinguish between:
+    1. Classes (Universal concepts, types, categories)
+    2. Individuals/Instances (Specific entities, e.g., "The Sun", "Pacific Ocean")
+    3. Relationships (Object Properties)
+    4. Attributes (Datatype Properties)
 
-Technical requirements:
-- CRITICAL: Generate well-formed XML - every opening tag must have a matching closing tag
-- Proper XML syntax: close all tags correctly (e.g., <owl:Class>...</owl:Class> or <owl:Class/>)
-- Valid OWL/XML that can be parsed without errors
-- Declare all required namespaces including xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-- Use rdfs:label and rdfs:comment for every class and property
-- Sequential IDs: CLASS_001, CLASS_002, ... and PROP_001, PROP_002, ...
-- For datatype properties, use appropriate XSD types (xsd:string, xsd:integer, xsd:decimal, xsd:boolean, xsd:date)
+    ONTOLOGICAL RULES (CRITICAL):
+    1. Hierarchy Logic (Is-A): Use rdfs:subClassOf ONLY for genuine taxonomic relationships (e.g., "Lion is a specific type of Animal").
+    - DO NOT use subClassOf for composition (Part-Of). "Engine" is NOT a subclass of "Car". Use an object property like 'hasPart' instead.
+    - DO NOT use subClassOf for membership. "Student" is NOT a subclass of "University".
+    2. Properties: Define domain and range for properties where clear from the text.
+    3. Disjointness: If concepts are mutually exclusive (e.g., Biotic vs Abiotic), create distinct branches.
+    4.- RDF/XML INSTANCE RULE: When assigning properties to Individuals/Instances, NEVER use the Instance ID as an XML tag.
+        (INCORRECT: <Professor_Amit>...</Professor_Amit>)
+        (CORRECT: <owl:NamedIndividual rdf:about="#Professor_Amit">...properties here...</owl:NamedIndividual>)
+        (CORRECT: <rdf:Description rdf:about="#Professor_Amit">...properties here...</rdf:Description>)
 
-Quality guidelines:
-- Comprehensiveness: capture the full scope of knowledge in the text
-- Depth: create multi-level hierarchies where appropriate
-- Precision: use accurate, domain-specific terminology
-- Completeness: don't summarize or create toy examples - extract all relevant information
+    TECHNICAL REQUIREMENTS:
+    1. Syntax: Generate VALID RDF/XML. Every opening tag must have a strict matching closing tag.
+    2. Namespace: Use xmlns="http://example.org/ontology#" and declare standard namespaces (rdf, rdfs, owl, xsd).
+    3. Identification: Use Semantic URIs for readability and consistency (e.g., rdf:about="#Photosynthesis" instead of "#CLASS_001"). *Only use numeric IDs if you cannot determine a unique English label.*
+    4. Metadata:
+    - Add <rdfs:label> for human-readable names.
+    - Add <rdfs:comment> extracting definitions directly from the text.
 
-Output format:
-- Return ONLY the OWL/XML content
-- Start with <?xml version="1.0"?>
-- No explanations, comments, or markdown formatting"""
+    STEPS:
+    1. Analyze the text to identify core concepts.
+    2. Determine the hierarchy tree (Taxonomy).
+    3. Identify relationships between concepts.
+    4. Extract data attributes (numbers, dates, strings).
+    5. Generate the XML output.
+
+    OUTPUT FORMAT:
+    Return ONLY the raw XML code starting with <?xml version="1.0"?>. Do not wrap in markdown code blocks. Do not add explanations.
+    """
 
         print("🤖 Generating ontology with LLM...")
         print(f"   Model: {self.model}")
