@@ -20,7 +20,7 @@ from ontology_generator import OntologyGenerator
 # Load configuration from yaml file
 def load_config():
     """Load configuration from api_keys.yaml"""
-    # Default configuration
+    # Default configuration (Ollama local)
     default_config = {
         'USE_OLLAMA': True,
         'OLLAMA_MODEL': 'llama3.3:70b',
@@ -35,7 +35,15 @@ def load_config():
             config = yaml.safe_load(f)
             if config:
                 # Merge with defaults
-                return {**default_config, **config}
+                merged = {**default_config, **config}
+                
+                # Auto-detect: if API key is provided, disable Ollama for LLM
+                # (embeddings still use Ollama for privacy)
+                if merged.get('openai_api_key') and merged['openai_api_key'] not in ['YOUR_API_KEY_HERE', 'YOUR_OPENROUTER_API_KEY']:
+                    merged['USE_OLLAMA'] = False
+                    print(f"✓ Detected API key, using cloud LLM: {merged.get('openai_model', 'gpt-4')}")
+                
+                return merged
     
     return default_config
 
@@ -556,17 +564,25 @@ def chat_page():
         with st.spinner("Loading query engine..."):
             parsed_dir = st.session_state.manager.get_parsed_dir(onto_id)
             
-            # Get configuration
+            # Get configuration from CONFIG
             use_ollama = CONFIG.get('USE_OLLAMA', True)
             ollama_model = CONFIG.get('OLLAMA_MODEL', 'llama3.3:70b')
             ollama_base_url = CONFIG.get('OLLAMA_BASE_URL', 'http://localhost:11434')
+            
+            # API configuration (for MegaLLM, OpenAI, etc.)
+            api_key = CONFIG.get('openai_api_key')
+            api_model = CONFIG.get('openai_model', 'gpt-4')
+            api_base_url = CONFIG.get('openai_base_url')
             
             try:
                 st.session_state.query_engine = GenericQueryEngine(
                     str(parsed_dir),
                     use_ollama=use_ollama,
                     ollama_model=ollama_model,
-                    ollama_base_url=f"{ollama_base_url}/v1"
+                    ollama_base_url=f"{ollama_base_url}/v1",
+                    api_key=api_key,
+                    api_model=api_model,
+                    api_base_url=api_base_url
                 )
             except Exception as e:
                 st.error(f"Error loading engine: {e}")
