@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+    #!/usr/bin/env python3
 """
 Generic OWL Ontology Parser - Works with ANY ontology!
 
@@ -53,12 +53,30 @@ class OWLParser:
     def extract_id_from_uri(self, uri: str) -> Optional[str]:
         """
         Extract term ID from URI - GENERIC approach
-        Handles: http://purl.obolibrary.org/obo/GO_0006281 -> GO:0006281
+        Handles:
+        - OBO: http://purl.obolibrary.org/obo/GO_0006281 -> GO:0006281
+        - FAQ: #FAQ_WhatIsStripe -> FAQ:WhatIsStripe
+        - Simple: #Producer -> Producer (NEW!)
         
         Also handles duplicate IDs from different namespaces:
         - http://purl.obolibrary.org/obo/ICDO_0000079 -> ICDO:0000079
         - http://purl.obolibrary.org/obo/icdo.owl/ICDO_0000079 -> ICDO:0000079_ns2
         """
+        # Check for FAQ/INST/PROP format with underscore (#FAQ_xxx or #INST_xxx or #PROP_xxx)
+        match = re.search(r'#([A-Z]+)_(.+)$', uri)
+        if match:
+            prefix = match.group(1)
+            name = match.group(2)
+            self.prefix_counts[prefix] += 1
+            return f"{prefix}:{name}"
+        
+        # Check for simple fragment URI like #Producer, #Consumer
+        match = re.search(r'#([A-Za-z][A-Za-z0-9_]*)$', uri)
+        if match:
+            name = match.group(1)
+            self.prefix_counts['CLASS'] += 1  # Default prefix
+            return name  # Return as-is, e.g., "Producer"
+        
         # Check if this is a secondary namespace (e.g., icdo.owl/ICDO_)
         is_secondary_namespace = False
         if re.search(r'/[a-z]+\.owl/[A-Z]', uri):
@@ -143,7 +161,8 @@ class OWLParser:
                 uri = elem.get('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about') or \
                       elem.get('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}ID')
                 
-                if uri and 'obo' in uri.lower():
+                # Accept any URI except W3C built-ins (owl, rdf, rdfs, xsd)
+                if uri and not uri.startswith('http://www.w3.org/'):
                     term_id = self.extract_id_from_uri(uri)
                     if term_id:
                         current_term = {

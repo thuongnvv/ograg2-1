@@ -20,11 +20,15 @@ from openai import OpenAI
 
 
 class GenericQueryEngine:
-    """Generic query engine for any ontology - 100% local"""
+    """Generic query engine for any ontology - Supports Ollama (local) or API (cloud)"""
     
     def __init__(self, ontology_dir: str, 
-                 use_ollama: bool = True, ollama_model: str = "llama3.3:70b",
-                 ollama_base_url: str = "http://localhost:11434/v1"):
+                 use_ollama: bool = True, 
+                 ollama_model: str = "llama3.3:70b",
+                 ollama_base_url: str = "http://localhost:11434/v1",
+                 api_key: str = None,
+                 api_model: str = "gpt-4",
+                 api_base_url: str = None):
         """
         Initialize query engine
         
@@ -33,10 +37,12 @@ class GenericQueryEngine:
             use_ollama: Whether to use Ollama for local LLM (default: True)
             ollama_model: Ollama model name (default: "llama3.3:70b")
             ollama_base_url: Ollama API base URL (default: "http://localhost:11434/v1")
+            api_key: OpenAI/MegaLLM API key (required if use_ollama=False)
+            api_model: API model name (default: "gpt-4")
+            api_base_url: Custom API base URL (for MegaLLM, etc.)
         """
         self.ontology_dir = Path(ontology_dir)
         self.use_ollama = use_ollama
-        self.ollama_model = ollama_model
         
         # Load metadata
         metadata_file = self.ontology_dir / 'ontology_metadata.json'
@@ -75,18 +81,41 @@ class GenericQueryEngine:
                 "Please rebuild your hypergraph with use_ollama=True"
             )
         
-        # Setup Ollama LLM client
+        # Setup LLM client - Support BOTH Ollama and API
         self.llm_client = None
+        
         if use_ollama:
+            # Local Ollama
             print(f"🔐 Using Ollama LLM: {ollama_model} (100% local)")
+            self.model_name = ollama_model
             self.llm_client = OpenAI(
-                api_key="ollama",  # Ollama doesn't need API key
+                api_key="ollama",  # Ollama doesn't need real API key
                 base_url=ollama_base_url
             )
         else:
-            print("Running in retrieval-only mode (no LLM)")
+            # Cloud API (OpenAI, MegaLLM, etc.)
+            if not api_key:
+                raise ValueError(
+                    "api_key required when use_ollama=False\n"
+                    "Provide your OpenAI/MegaLLM API key"
+                )
+            
+            self.model_name = api_model
+            kwargs = {
+                "api_key": api_key,
+                "timeout": 60.0,
+                "max_retries": 3
+            }
+            if api_base_url:
+                kwargs["base_url"] = api_base_url
+                print(f"☁️  Using API LLM: {api_model} (via {api_base_url})")
+            else:
+                print(f"☁️  Using OpenAI LLM: {api_model}")
+            
+            self.llm_client = OpenAI(**kwargs)
         
         print(f"✓ Ready! ({len(self.facts):,} facts, {len(self.hypernodes):,} nodes)\n")
+
     
     def _get_embedding(self, text: str) -> np.ndarray:
         """Get embedding for text using Ollama (100% local)"""
@@ -386,8 +415,8 @@ INSTRUCTIONS:
 Answer:"""
         
         try:
-            # Use Ollama model
-            model = self.ollama_model  # e.g., "llama3.3:70b", "llama3.2", "mistral"
+            # Use configured model (Ollama or API)
+            model = self.model_name  # e.g., "llama3.3:70b", "gpt-4", "llama3.3-70b-instruct"
             
             response = self.llm_client.chat.completions.create(
                 model=model,

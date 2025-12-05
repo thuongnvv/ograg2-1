@@ -91,72 +91,125 @@ class OntologyGenerator:
         return text.strip()
     
     def extract_text_from_url(self, url: str) -> str:
-        """Extract text from web page or PDF URL"""
-        try:
-            # Download with headers to avoid blocks
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-            
-            # Try with SSL verification first
+        """
+        Extract text from web page with adaptive strategy selection
+        
+        NEW APPROACH (v2):
+        - Auto-detect site type (static HTML, SPA, dynamic, PDF, API)
+        - Select optimal scraping strategy
+        - Validate content quality
+        - Intelligent retry with fallback
+        """
+        from utils.url_analyzer import URLAnalyzer
+        from utils.scraping_strategies import create_strategy, ScrapingConfig
+        from utils.content_validator import ContentValidator
+        import time
+        
+        print(f"🔍 Analyzing URL: {url}")
+        
+        # Step 1: Analyze URL to determine optimal strategy
+        analyzer = URLAnalyzer(timeout=10)
+        analysis = analyzer.analyze(url)
+        
+        print(f"   Site Type: {analysis.site_type.value}")
+        print(f"   Protection: {analysis.protection_type.value}")
+        print(f"   Recommended Strategy: {analysis.recommended_strategy}")
+        print(f"   Estimated Timeout: {analysis.estimated_timeout}s")
+        
+        # Check robots.txt
+        if not analysis.is_robots_allowed:
+            print(f"   ⚠️  Warning: robots.txt may disallow scraping")
+        
+        # Step 2: Create scraping configuration
+        config = ScrapingConfig(
+            timeout=analysis.estimated_timeout,
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            wait_time=2,
+            max_retries=3,
+            verify_ssl=True
+        )
+        
+        # Step 3: Try primary strategy with retry
+        max_attempts = config.max_retries
+        last_error = None
+        text = None
+        
+        for attempt in range(1, max_attempts + 1):
             try:
-                response = requests.get(url, timeout=30, headers=headers)
-                response.raise_for_status()
-            except requests.exceptions.SSLError:
-                # Retry without SSL verification for sites with cert issues
-                import warnings
-                warnings.filterwarnings('ignore', message='Unverified HTTPS request')
-                response = requests.get(url, timeout=30, headers=headers, verify=False)
-                response.raise_for_status()
-            
-            # Check if it's a PDF
-            content_type = response.headers.get('Content-Type', '').lower()
-            is_pdf = 'application/pdf' in content_type or url.lower().endswith('.pdf')
-            
-            if is_pdf:
-                # Save temporary PDF and extract text
-                import tempfile
-                with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
-                    tmp.write(response.content)
-                    tmp_path = tmp.name
+                print(f"   📥 Attempt {attempt}/{max_attempts} with {analysis.recommended_strategy} strategy...")
                 
-                try:
-                    text = self.extract_text_from_pdf(tmp_path)
-                except Exception as pdf_error:
-                    # Clean up and re-raise with helpful message
-                    Path(tmp_path).unlink(missing_ok=True)
-                    raise ValueError(
-                        f"PDF extraction failed: {pdf_error}. "
-                        "The PDF may be corrupted, password-protected, or image-based. "
-                        "Try downloading and uploading the file instead."
-                    )
-                finally:
-                    Path(tmp_path).unlink(missing_ok=True)
+                # Create and execute strategy
+                strategy = create_strategy(analysis.recommended_strategy, config)
+                text = strategy.extract(url)
                 
-                return text
-            
-            # Parse HTML
-            soup = BeautifulSoup(response.content, 'lxml')
-            
-            # Remove script and style elements
-            for script in soup(["script", "style"]):
-                script.decompose()
-            
-            # Get text
-            text = soup.get_text()
-            
-            # Clean up
-            lines = (line.strip() for line in text.splitlines())
-            chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-            text = '\n'.join(chunk for chunk in chunks if chunk)
-            
+                print(f"   ✓ Extracted {len(text)} characters")
+                
+                # Step 4: Validate content quality
+                validator = ContentValidator(
+                    min_length=200,
+                    min_quality_score=0.3,
+                    max_boilerplate_ratio=0.7
+                )
+                
+                validation = validator.validate(text, url)
+                
+                if validation.is_valid:
+                    print(f"   ✓ Content quality: {validation.quality_score:.2f}")
+                    # Use cleaned text if available
+                    return validation.cleaned_text or text
+                else:
+                    print(f"   ⚠️  Content validation issues:")
+                    for issue in validation.issues:
+                        print(f"       - {issue}")
+                    
+                    # If this is NOT the last attempt, try fallback strategy
+                    if attempt < max_attempts:
+                        print(f"   🔄 Trying fallback strategy...")
+                        # Try hybrid strategy as fallback
+                        if analysis.recommended_strategy != 'hybrid':
+                            analysis.recommended_strategy = 'hybrid'
+                            config.timeout = 25
+                            continue
+                    
+                    # Last attempt: accept if we have some content
+                    if validation.quality_score >= 0.2 and len(text) >= 100:
+                        print(f"   ⚠️  Accepting marginal content (score: {validation.quality_score:.2f})")
+                        return validation.cleaned_text or text
+                    
+                    last_error = f"Content quality too low: {validation.quality_score:.2f}"
+                
+            except Exception as e:
+                last_error = str(e)
+                print(f"   ⚠️  Attempt {attempt} failed: {e}")
+                
+                # Exponential backoff
+                if attempt < max_attempts:
+                    wait_time = 2 ** attempt
+                    print(f"   ⏳ Waiting {wait_time}s before retry...")
+                    time.sleep(wait_time)
+        
+        # All attempts failed
+        if text and len(text) >= 50:
+            # We have SOME text, return it despite validation failure
+            print(f"   ⚠️  Returning partial content ({len(text)} chars) after all retries failed")
             return text
-        except Exception as e:
-            raise ValueError(f"Failed to extract text from URL: {e}")
+        
+        # Complete failure
+        raise ValueError(
+            f"Failed to extract sufficient content from URL after {max_attempts} attempts. "
+            f"Last error: {last_error}. "
+            f"The page may require JavaScript, have anti-scraping protection, or be unavailable."
+        )
+
     
     def generate_ontology(self, text: str, domain: str = "general") -> str:
         """
         Generate OWL ontology from text using LLM
+        
+        UNIVERSAL APPROACH (v2):
+        - Single prompt works for ALL content types (FAQ, Domain Knowledge, Mixed)
+        - LLM automatically chooses appropriate OWL constructs
+        - Strict format requirements to avoid errors
         
         Args:
             text: Input text to analyze
@@ -165,50 +218,182 @@ class OntologyGenerator:
         Returns:
             OWL/XML string
         """
-        prompt = f"""You are an expert Ontology Engineer and Knowledge Graph Architect. Your task is to analyze the provided text and construct a high-quality, logically consistent OWL ontology in RDF/XML format.
+        # UNIVERSAL PROMPT - Works for ANY content type
+        prompt = f"""You are an expert Ontology Engineer. Your task is to convert the provided text into a valid OWL ontology in RDF/XML format.
 
-    Domain context: {domain}
+═══════════════════════════════════════════════════════════════════
+DOMAIN CONTEXT: {domain}
+═══════════════════════════════════════════════════════════════════
 
-    Input Text:
-    {text}
+INPUT TEXT:
+{text}
 
-    ---
-    CORE TASK:
-    Transform the knowledge in the text into a formal ontology. You must strictly distinguish between:
-    1. Classes (Universal concepts, types, categories)
-    2. Individuals/Instances (Specific entities, e.g., "The Sun", "Pacific Ocean")
-    3. Relationships (Object Properties)
-    4. Attributes (Datatype Properties)
+═══════════════════════════════════════════════════════════════════
+YOUR TASK: Analyze the text and extract ALL knowledge into OWL format
+═══════════════════════════════════════════════════════════════════
 
-    ONTOLOGICAL RULES (CRITICAL):
-    1. Hierarchy Logic (Is-A): Use rdfs:subClassOf ONLY for genuine taxonomic relationships (e.g., "Lion is a specific type of Animal").
-    - DO NOT use subClassOf for composition (Part-Of). "Engine" is NOT a subclass of "Car". Use an object property like 'hasPart' instead.
-    - DO NOT use subClassOf for membership. "Student" is NOT a subclass of "University".
-    2. Properties: Define domain and range for properties where clear from the text.
-    3. Disjointness: If concepts are mutually exclusive (e.g., Biotic vs Abiotic), create distinct branches.
-    4.- RDF/XML INSTANCE RULE: When assigning properties to Individuals/Instances, NEVER use the Instance ID as an XML tag.
-        (INCORRECT: <Professor_Amit>...</Professor_Amit>)
-        (CORRECT: <owl:NamedIndividual rdf:about="#Professor_Amit">...properties here...</owl:NamedIndividual>)
-        (CORRECT: <rdf:Description rdf:about="#Professor_Amit">...properties here...</rdf:Description>)
 
-    TECHNICAL REQUIREMENTS:
-    1. Syntax: Generate VALID RDF/XML. Every opening tag must have a strict matching closing tag.
-    2. Namespace: Use xmlns="http://example.org/ontology#" and declare standard namespaces (rdf, rdfs, owl, xsd).
-    3. Identification: Use Semantic URIs for readability and consistency (e.g., rdf:about="#Photosynthesis" instead of "#CLASS_001"). *Only use numeric IDs if you cannot determine a unique English label.*
-    4. Metadata:
-    - Add <rdfs:label> for human-readable names.
-    - Add <rdfs:comment> extracting definitions directly from the text.
+STEP 1: DETECT CONTENT TYPE (Follow this order - FIRST MATCH WINS)
 
-    STEPS:
-    1. Analyze the text to identify core concepts.
-    2. Determine the hierarchy tree (Taxonomy).
-    3. Identify relationships between concepts.
-    4. Extract data attributes (numbers, dates, strings).
-    5. Generate the XML output.
+═══════════════════════════════════════════════════════════════════
+PRIORITY 1: FAQ / Q&A CONTENT DETECTION
+═══════════════════════════════════════════════════════════════════
+DETECTION RULES (if ANY of these are true, treat as FAQ):
+✓ Text contains 3+ questions ending with "?"
+✓ Questions followed by explanatory text (answers)
+✓ Keywords present: "FAQ", "frequently asked", "Q:", "A:"
+✓ Pattern: Question → Answer → Question → Answer
 
-    OUTPUT FORMAT:
-    Return ONLY the raw XML code starting with <?xml version="1.0"?>. Do not wrap in markdown code blocks. Do not add explanations.
-    """
+IF FAQ DETECTED:
+CRITICAL: Create ONLY owl:Class elements (NO Properties, NO Individuals)
+- ONE Class per Q&A pair
+- rdfs:label = COMPLETE question text (keep the "?")
+- rdfs:comment = COMPLETE answer text (all details, multiple sentences OK)
+- Use IDs like: #FAQ_WhatIsStripe, #FAQ_HowToRefund
+- DO NOT create owl:ObjectProperty
+- DO NOT create relationships between questions
+
+EXAMPLE (CORRECT FAQ Structure):
+'''xml
+<owl:Class rdf:about="#FAQ_WhatIsStripe">
+  <rdfs:label>What is Stripe?</rdfs:label>
+  <rdfs:comment>Stripe is a payment processing platform that allows businesses to accept payments online. When you see a charge from Stripe on your statement, it means a business using Stripe processed your payment.</rdfs:comment>
+</owl:Class>
+
+<owl:Class rdf:about="#FAQ_UnrecognizedCharge">
+  <rdfs:label>What should I do if I don't recognize a charge from Stripe?</rdfs:label>
+  <rdfs:comment>Use the charge lookup tool at stripe.com/chargeid to identify which business processed the charge. Enter the charge ID from your bank statement to see the business name and description.</rdfs:comment>
+</owl:Class>
+'''
+
+WRONG FAQ Examples (DO NOT DO THIS):
+❌ <owl:ObjectProperty rdf:about="#usesChargeLookupTool"> <!-- WRONG! -->
+❌ <owl:NamedIndividual rdf:about="#Question1"> <!-- WRONG! -->
+❌ Creating relationships between questions <!-- WRONG! -->
+
+═══════════════════════════════════════════════════════════════════
+PRIORITY 2: DOMAIN KNOWLEDGE / CONCEPTS
+═══════════════════════════════════════════════════════════════════
+IF NOT FAQ, check for:
+- Concept definitions and classifications
+- "is a" / "type of" hierarchical relationships
+- Formal taxonomy structure
+
+THEN create:
+- owl:Class for each concept
+- rdfs:subClassOf for hierarchies
+- rdfs:label and rdfs:comment for definitions
+
+EXAMPLE:
+'''xml
+<owl:Class rdf:about="#Mammal">
+  <rdfs:label>Mammal</rdfs:label>
+  <rdfs:comment>Warm-blooded vertebrate animal.</rdfs:comment>
+  <rdfs:subClassOf rdf:resource="#Animal"/>
+</owl:Class>
+'''
+
+═══════════════════════════════════════════════════════════════════
+PRIORITY 3: RELATIONSHIPS / PROCESSES
+═══════════════════════════════════════════════════════════════════
+IF content describes actions, connections, or processes between entities:
+
+'''xml
+<owl:ObjectProperty rdf:about="#processes">
+  <rdfs:label>processes</rdfs:label>
+  <rdfs:comment>Indicates that one entity processes another.</rdfs:comment>
+  <rdfs:domain rdf:resource="#PaymentProcessor"/>
+  <rdfs:range rdf:resource="#Payment"/>
+</owl:ObjectProperty>
+'''
+
+═══════════════════════════════════════════════════════════════════
+PRIORITY 4: CONCRETE EXAMPLES / INSTANCES
+═══════════════════════════════════════════════════════════════════
+IF content mentions specific real-world examples:
+
+'''xml
+<owl:NamedIndividual rdf:about="#Pacific_Ocean">
+  <rdf:type rdf:resource="#Ocean"/>
+  <rdfs:label>Pacific Ocean</rdfs:label>
+  <rdfs:comment>Largest ocean on Earth.</rdfs:comment>
+</owl:NamedIndividual>
+'''
+
+
+═══════════════════════════════════════════════════════════════════
+CRITICAL XML/OWL REQUIREMENTS (MUST FOLLOW EXACTLY):
+═══════════════════════════════════════════════════════════════════
+
+1. STRUCTURE:
+   - Start with: <?xml version="1.0"?>
+   - Root element: <rdf:RDF> with ALL required namespaces
+   - Include <owl:Ontology rdf:about=""/> element
+   - Close all tags properly
+
+2. REQUIRED NAMESPACES (copy exactly):
+   xmlns="http://example.org/ontology#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+
+3. URI FORMAT:
+   - Use descriptive names: #WhatIsPython NOT #Class001
+   - Use CamelCase or Underscores: #What_Is_Python or #WhatIsPython
+   - No spaces, no special chars except underscore
+   - Must start with # for local URIs
+
+4. REQUIRED ANNOTATIONS:
+   - Every owl:Class MUST have rdfs:label
+   - Every owl:Class SHOULD have rdfs:comment (if information available)
+   - Use rdfs:comment for definitions, descriptions, answers
+
+5. XML SYNTAX:
+   - Self-closing tags: <owl:Ontology rdf:about=""/>
+   - Proper nesting: close inner tags before outer tags
+   - Escape special characters: &lt; &gt; &amp; &quot; &apos;
+   - No unclosed tags
+
+═══════════════════════════════════════════════════════════════════
+OUTPUT FORMAT TEMPLATE:
+═══════════════════════════════════════════════════════════════════
+
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns="http://example.org/ontology#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+    
+  <owl:Ontology rdf:about=""/>
+  
+  <!-- Your OWL entities here -->
+  
+</rdf:RDF>
+
+═══════════════════════════════════════════════════════════════════
+QUALITY CHECKLIST (verify before outputting):
+═══════════════════════════════════════════════════════════════════
+
+✓ XML declaration present
+✓ All 5 namespaces declared (xmlns, rdf, rdfs, owl, xsd)
+✓ <owl:Ontology/> element present
+✓ All tags properly closed
+✓ All URIs start with #
+✓ All Classes have rdfs:label
+✓ No placeholder content (replace "..." with actual content)
+✓ Special characters properly escaped
+
+═══════════════════════════════════════════════════════════════════
+FINAL INSTRUCTION:
+═══════════════════════════════════════════════════════════════════
+
+Output ONLY the raw XML. Do NOT use markdown code blocks. Do NOT add explanations before or after.
+Begin your response with: <?xml version="1.0"?>
+"""
+
 
         print("🤖 Generating ontology with LLM...")
         print(f"   Model: {self.model}")
@@ -246,6 +431,17 @@ class OntologyGenerator:
             # Ensure it starts with XML declaration
             if not owl_content.startswith("<?xml"):
                 owl_content = '<?xml version="1.0"?>\n' + owl_content
+            
+            # Auto-fix: Add <owl:Ontology> if missing
+            if "<owl:Ontology" not in owl_content and "<Ontology" not in owl_content:
+                # Insert after <rdf:RDF ...> opening tag
+                import re
+                match = re.search(r'(<rdf:RDF[^>]*>)', owl_content, re.DOTALL)
+                if match:
+                    insertion_point = match.end()
+                    owl_ontology_tag = '\n  <owl:Ontology rdf:about=""/>\n'
+                    owl_content = owl_content[:insertion_point] + owl_ontology_tag + owl_content[insertion_point:]
+                    print("   ℹ️  Auto-added missing <owl:Ontology> element")
             
             return owl_content
             

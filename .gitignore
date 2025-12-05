@@ -63,3 +63,12 @@ Thumbs.db
 
 #Others
 clean_source.sh
+
+# V2 Development Files (temporary/debug)
+CHANGELOG_V2.md
+configs/scraping_config.yaml
+debug_retrieval.py
+test_url_processing.py
+utils/content_validator.py
+utils/scraping_strategies.py
+utils/url_analyzer.py
