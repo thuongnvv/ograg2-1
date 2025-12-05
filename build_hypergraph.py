@@ -58,8 +58,14 @@ def flatten_term_to_facts(term_data: Dict[str, Any], key_prefix: str) -> list:
         core_parts.append(f"ID: {term_data['id']}")
     if 'label' in term_data:
         core_parts.append(f"Label: {term_data['label']}")
+    
+    # Flexible content field - works for both formal ontologies AND FAQ
     if 'definition' in term_data:
         core_parts.append(f"Definition: {term_data['definition']}")
+    elif 'comments' in term_data and term_data['comments']:
+        # Fallback for FAQ-style: use comment as main content
+        core_parts.append(f"Answer: {term_data['comments'][0]}")
+    
     if 'namespace' in term_data:
         core_parts.append(f"Namespace: {term_data['namespace']}")
     
@@ -184,12 +190,12 @@ def get_ollama_embeddings(texts: List[str], model: str = "nomic-embed-text",
     for text in tqdm(texts, desc=f"Getting embeddings from Ollama ({model})"):
         try:
             response = requests.post(
-                f"{base_url}/api/embeddings",
-                json={"model": model, "prompt": text},
+                f"{base_url}/api/embed",
+                json={"model": model, "input": text},
                 timeout=30
             )
             response.raise_for_status()
-            embedding = response.json()['embedding']
+            embedding = response.json()['embeddings'][0]
             embeddings.append(embedding)
         except Exception as e:
             print(f"Error getting embedding: {e}")
@@ -253,9 +259,15 @@ def build_hypergraph(ontology_dir: str, model_name: str = "nomic-embed-text",
     model = None  # Will use Ollama API instead
     embed_dim = 768  # nomic-embed-text dimension
     
-    # Load all term files
-    ontology_files = sorted(Path(ontology_dir).glob("term_*.json"))
-    print(f"Found {len(ontology_files)} term files\n")
+    # Load all term files - Auto-detect location
+    # Try parsed/ subdirectory first (new structure), then ontology_dir (old structure)
+    parsed_dir = Path(ontology_dir) / "parsed"
+    if parsed_dir.exists():
+        ontology_files = sorted(parsed_dir.glob("term_*.json"))
+        print(f"Found {len(ontology_files)} term files in parsed/ subdirectory\n")
+    else:
+        ontology_files = sorted(Path(ontology_dir).glob("term_*.json"))
+        print(f"Found {len(ontology_files)} term files in ontology directory\n")
     
     # Flatten to facts
     print("Flattening terms to facts...")
