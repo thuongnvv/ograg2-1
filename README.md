@@ -11,7 +11,7 @@ Choose one of three setups:
 ```bash
 git clone <repository-url>
 cd ograg2-1
-git checkout feature/ontology-generator-api
+git checkout feature/faq-universal-support
 
 # Run setup script
 ./setup_api.sh
@@ -33,7 +33,7 @@ streamlit run app.py
 ```bash
 git clone <repository-url>
 cd ograg2-1
-git checkout feature/ontology-generator-api
+git checkout feature/faq-universal-support
 
 # Run setup script
 ./setup_ollama_dev.sh
@@ -55,7 +55,7 @@ streamlit run app.py
 ```bash
 git clone <repository-url>
 cd ograg2-1
-git checkout feature/ontology-generator-api
+git checkout feature/faq-universal-support
 
 # Run setup script
 ./setup_ollama_production.sh
