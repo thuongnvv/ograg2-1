@@ -1,0 +1,61 @@
+# URL Processing Configuration
+
+# User agents rotation (randomly selected for each request)
+user_agents:
+  - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  - "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0"
+  - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"
+
+# Default timeout values per strategy (seconds)
+timeouts:
+  static_html: 10
+  javascript: 30
+  hybrid: 25
+  slow_load: 60
+  stealth: 45
+  api: 5
+  pdf: 15
+
+# Retry configuration
+retry:
+  max_attempts: 3
+  backoff_factor: 2  # Exponential backoff: 2s, 4s, 8s
+  retry_on_exceptions:
+    - timeout
+    - connection_error
+    - ssl_error
+    - http_error
+
+# Content validation rules
+validation:
+  min_length: 200  # Minimum text length in characters
+  min_quality_score: 0.3  # 0.0 to 1.0
+  max_boilerplate_ratio: 0.7  # Maximum ratio of boilerplate to content
+
+# Strategy selection preferences
+strategy:
+  # Prefer fast strategies when possible
+  prefer_static: true
+  
+  # Fallback chain: primary -> hybrid -> stealth
+  fallback_chain:
+    - hybrid
+    - stealth
+  
+  # Force specific strategy for domains (optional)
+  domain_overrides:
+    # Example: "wikipedia.org": "static"
+    # Example: "medium.com": "javascript"
+
+# Anti-detection settings (for stealth strategy)
+stealth:
+  enabled: false  # Enable stealth mode globally
+  random_delays: true  # Add random delays between requests
+  delay_range: [1, 3]  # Random delay range in seconds
+  rotate_user_agents: true
+
+# Robots.txt compliance
+robots_txt:
+  respect: true  # Check and respect robots.txt
+  cache_duration: 3600  # Cache robots.txt for 1 hour
