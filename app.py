@@ -41,7 +41,6 @@ def load_config():
                 # (embeddings still use Ollama for privacy)
                 if merged.get('openai_api_key') and merged['openai_api_key'] not in ['YOUR_API_KEY_HERE', 'YOUR_OPENROUTER_API_KEY']:
                     merged['USE_OLLAMA'] = False
-                    print(f"✓ Detected API key, using cloud LLM: {merged.get('openai_model', 'gpt-4')}")
                 
                 return merged
     
@@ -137,31 +136,36 @@ def generate_ontology_page():
     api_key = None
     base_url = None
     model_name = "gpt-4"
-    use_ollama = False
+    use_ollama = CONFIG.get('USE_OLLAMA', False)
     
-    # Try api_keys.yaml first
-    api_keys_file = Path("api_keys.yaml")
-    if api_keys_file.exists():
-        with open(api_keys_file, 'r') as f:
-            api_keys = yaml.safe_load(f)
-            api_key = api_keys.get('openai_api_key')
-            if api_key and api_key not in ["YOUR_OPENROUTER_API_KEY", "YOUR_API_KEY_HERE"]:
-                base_url = api_keys.get('openai_base_url')
-                model_name = api_keys.get('openai_model', 'gpt-4')
-            else:
-                api_key = None
-    
-    # Fallback to embedded MegaLLM key
-    if not api_key:
-        st.warning("⚠️ No API key found in api_keys.yaml. Please add your API key to continue.")
-        st.info("Edit `api_keys.yaml` and add your MegaLLM or other provider API key.")
-        st.stop()
-    
-    # Display mode
-    if base_url:
-        st.success(f"✅ Using {model_name}")
+    # If using Ollama, no API key needed
+    if use_ollama:
+        model_name = CONFIG.get('OLLAMA_MODEL', 'tinyllama')
+        st.success(f"✅ Using Ollama (Local): {model_name}")
     else:
-        st.success(f"✅ Using OpenAI {model_name}")
+        # Try api_keys.yaml for cloud API
+        api_keys_file = Path("api_keys.yaml")
+        if api_keys_file.exists():
+            with open(api_keys_file, 'r') as f:
+                api_keys = yaml.safe_load(f)
+                api_key = api_keys.get('openai_api_key')
+                if api_key and api_key not in ["YOUR_OPENROUTER_API_KEY", "YOUR_API_KEY_HERE"]:
+                    base_url = api_keys.get('openai_base_url')
+                    model_name = api_keys.get('openai_model', 'gpt-4')
+                else:
+                    api_key = None
+        
+        # API key required for cloud mode
+        if not api_key:
+            st.warning("⚠️ No API key found in api_keys.yaml. Please add your API key to continue.")
+            st.info("Edit `api_keys.yaml` and add your MegaLLM or other provider API key, OR set `USE_OLLAMA: true` to use local Ollama.")
+            st.stop()
+        
+        # Display mode
+        if base_url:
+            st.success(f"✅ Using {model_name}")
+        else:
+            st.success(f"✅ Using OpenAI {model_name}")
     
     # Source selection
     st.markdown("---")

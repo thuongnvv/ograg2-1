@@ -26,6 +26,12 @@ streamlit run app.py
 **Models:** Cloud-based (MegaLLM/Groq/OpenAI)  
 **Cost:** $0.12-0.30/M tokens
 
+> **Note:** The setup script automatically installs Playwright for web scraping. If you encounter issues, manually run:
+> ```bash
+> pip install playwright
+> playwright install chromium
+> ```
+
 ---
 
 ### Option 2: Local Ollama - Development

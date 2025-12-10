@@ -15,7 +15,19 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Install Python dependencies
+echo "📦 Installing Python dependencies..."
+pip install -r requirements.txt
+echo -e "${GREEN}✓ Dependencies installed${NC}"
+
+# Install Playwright browsers
+echo ""
+echo "🌐 Installing Playwright browsers..."
+playwright install chromium
+echo -e "${GREEN}✓ Playwright chromium installed${NC}"
+
 # Check if Ollama is installed
+echo ""
 echo "📦 Checking Ollama installation..."
 if ! command -v ollama &> /dev/null; then
     echo -e "${YELLOW}Ollama not found. Installing...${NC}"

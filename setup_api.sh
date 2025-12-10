@@ -31,6 +31,12 @@ echo "📦 Installing Python dependencies..."
 pip install -r requirements.txt
 echo -e "${GREEN}✓ Dependencies installed${NC}"
 
+# Install Playwright browsers
+echo ""
+echo "🌐 Installing Playwright browsers..."
+playwright install chromium
+echo -e "${GREEN}✓ Playwright chromium installed${NC}"
+
 # Create api_keys.yaml from template
 echo ""
 echo "📝 Creating api_keys.yaml..."

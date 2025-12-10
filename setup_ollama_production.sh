@@ -41,6 +41,18 @@ if [ "$AVAILABLE_DISK" -lt 50 ]; then
     exit 1
 fi
 
+# Install Python dependencies
+echo ""
+echo "📦 Installing Python dependencies..."
+pip install -r requirements.txt
+echo -e "${GREEN}✓ Dependencies installed${NC}"
+
+# Install Playwright browsers
+echo ""
+echo "🌐 Installing Playwright browsers..."
+playwright install chromium
+echo -e "${GREEN}✓ Playwright chromium installed${NC}"
+
 # Check if Ollama is installed
 echo ""
 echo "📦 Checking Ollama installation..."
