@@ -156,6 +156,34 @@ def flatten_term_to_facts(term_data: Dict[str, Any], key_prefix: str) -> list:
             'label': term_data.get('label', ''),
             '_searchable_text': '\n'.join(detail_parts)
         })
+
+    # CHUNK 5: CUSTOM PROPERTIES (NEW)
+    properties = term_data.get('properties', {})
+    if properties:
+        prop_parts = []
+        # Add context header only if needed, but keep it minimal for embedding
+        prop_parts.append(f"Entity: {term_data.get('label', term_id)}")
+        
+        for prop_name, values in properties.items():
+            # Ensure values is a list
+            if not isinstance(values, list):
+                values = [values]
+            for val in values:
+                # Truncate long values
+                val_str = str(val)
+                if len(val_str) > 500:
+                    val_str = val_str[:500] + '...'
+                prop_parts.append(f"  {prop_name}: {val_str}")
+        
+        facts.append({
+            '_raw_term': term_data,
+            '_ontology_prefix': key_prefix,
+            '_chunk_type': 'properties',
+            '_term_id': term_id,
+            'id': term_id,
+            'label': term_data.get('label', ''),
+            '_searchable_text': '\n'.join(prop_parts)
+        })
     
     # If no chunks created (shouldn't happen), create minimal one
     if not facts:
