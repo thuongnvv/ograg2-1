@@ -250,21 +250,32 @@ def generate_ontology_page():
             help="Only single web page (not entire website)"
         )
         
+        # Ontology Mode Selection
+        ontology_mode = st.radio(
+            "Ontology Mode",
+            ["Structured (Recommended)", "Flat (Legacy FAQ)"],
+            help="Structured: Creates rich hierarchy and relationships (2-step process). Flat: Creates simple classes only."
+        )
+        
+        mode_value = "structured" if "Structured" in ontology_mode else "flat"
+        
         if url and st.button("🤖 Generate Ontology", type="primary"):
-            with st.spinner(f"Analyzing web page with {model_name}..."):
+            with st.spinner(f"Analyzing web page with {model_name} ({mode_value} mode)..."):
                 try:
                     # Initialize generator
                     if use_ollama:
                         generator = OntologyGenerator(
                             use_ollama=True,
                             model=model_name,
-                            ollama_base_url=f"{CONFIG.get('OLLAMA_BASE_URL', 'http://localhost:11434')}/v1"
+                            ollama_base_url=f"{CONFIG.get('OLLAMA_BASE_URL', 'http://localhost:11434')}/v1",
+                            ontology_mode=mode_value
                         )
                     else:
                         generator = OntologyGenerator(
                             api_key=api_key,
                             model=model_name,
-                            base_url=base_url
+                            base_url=base_url,
+                            ontology_mode=mode_value
                         )
                     
                     generated_result = generator.process_url(
@@ -627,7 +638,7 @@ def chat_page():
         # Generate response
         with st.chat_message("assistant"):
             with st.spinner("Searching ontology..."):
-                result = engine.query(prompt, top_k=5, use_llm=True)
+                result = engine.query(prompt, top_k=20, use_llm=True)
             
             answer = result['answer']
             st.markdown(answer)

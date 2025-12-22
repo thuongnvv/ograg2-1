@@ -1,4 +1,4 @@
-api_keys.yaml
+
 *.yaml.local
 
 __pycache__/
@@ -21,12 +21,12 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
+# data
 venv/
 env/
 ENV/
 .venv
-
+# docs
 # IDE
 .vscode/
 .idea/
@@ -69,3 +69,5 @@ CHANGELOG_V2.md
 debug_retrieval.py
 test_url_processing.py
 
+api_keys.yaml
+docs
