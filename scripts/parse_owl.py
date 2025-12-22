@@ -235,7 +235,8 @@ class OWLParser:
                 self._extract_all_properties(current_class, current_property)
                 
                 # Save as a special term (with PROP: prefix)
-                if current_property.get('label'):  # Only save if has label
+                # Save if has label OR property_name
+                if current_property.get('label') or current_property.get('property_name'):
                     self._save_term(current_property)
                     property_count += 1
                 
@@ -250,7 +251,11 @@ class OWLParser:
                 self._extract_all_properties(current_class, current_individual)
                 
                 # Save as a special term (with INST: prefix)
-                if current_individual.get('label'):  # Only save if has label
+                # Save if has label OR instance_name OR definition OR comments
+                if (current_individual.get('label') or 
+                    current_individual.get('instance_name') or 
+                    current_individual.get('definition') or 
+                    current_individual.get('comments')):
                     self._save_term(current_individual)
                     individual_count += 1
                 
@@ -363,6 +368,31 @@ class OWLParser:
                 
                 # Check for restrictions (other relationships)
                 self._extract_restrictions(child, term)
+            
+            # CATCH-ALL FOR CUSTOM PROPERTIES
+            else:
+                # Skip RDF/OWL built-ins we already handled
+                if tag_local in ['type', 'about', 'ID', 'resource']:
+                    continue
+                    
+                # Extract property name
+                prop_name = tag_local
+                
+                # Initialize custom properties dict if needed
+                if 'properties' not in term:
+                    term['properties'] = {}
+                
+                if prop_name not in term['properties']:
+                    term['properties'][prop_name] = []
+                
+                # Handle resource refs (ObjectProperty) vs text (DatatypeProperty)
+                resource = child.get('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}resource')
+                if resource:
+                    target_id = self.extract_id_from_uri(resource)
+                    if target_id:
+                        term['properties'][prop_name].append(target_id)
+                elif text:
+                    term['properties'][prop_name].append(text)
     
     def _extract_restrictions(self, elem, term: Dict):
         """Extract relationships from owl:Restriction elements"""
