@@ -11,6 +11,7 @@ Features:
 import re
 from pathlib import Path
 from typing import Optional, Dict, Any
+import json
 from datetime import datetime
 
 # Document parsers
@@ -31,7 +32,8 @@ class OntologyGenerator:
                  model: str = "gpt-4",
                  use_ollama: bool = False,
                  ollama_base_url: str = "http://localhost:11434/v1",
-                 base_url: str = None):
+                 base_url: str = None,
+                 ontology_mode: str = "structured"):
         """
         Initialize generator
         
@@ -41,6 +43,7 @@ class OntologyGenerator:
             use_ollama: Use Ollama instead of OpenAI API
             ollama_base_url: Ollama server URL (only if use_ollama=True)
             base_url: Custom API base URL (for OpenAI-compatible APIs)
+            ontology_mode: "flat" for old FAQ style, "structured" for DSL-compatible (default)
         """
         if use_ollama:
             self.llm_client = OpenAI(
@@ -62,6 +65,7 @@ class OntologyGenerator:
         
         self.model = model
         self.use_ollama = use_ollama
+        self.ontology_mode = ontology_mode  # "flat" or "structured"
     
     def extract_text_from_pdf(self, pdf_path: str) -> str:
         """Extract text from PDF file with fallback options"""
@@ -204,22 +208,98 @@ class OntologyGenerator:
     
     def generate_ontology(self, text: str, domain: str = "general") -> str:
         """
-        Generate OWL ontology from text using LLM
+        Generate OWL ontology from text using LLM (2-Step Process)
         
-        UNIVERSAL APPROACH (v2):
-        - Single prompt works for ALL content types (FAQ, Domain Knowledge, Mixed)
-        - LLM automatically chooses appropriate OWL constructs
-        - Strict format requirements to avoid errors
+        Modes:
+        - "flat": Old FAQ style (flat classes only)
+        - "structured": 2-Step Process (Schema Discovery -> Ontology Generation)
         
         Args:
             text: Input text to analyze
-            domain: Domain of the ontology (for context)
+            domain: Domain of the ontology
             
         Returns:
             OWL/XML string
         """
-        # UNIVERSAL PROMPT - Works for ANY content type
-        prompt = f"""You are an expert Ontology Engineer. Your task is to convert the provided text into a valid OWL ontology in RDF/XML format.
+        # Mode 1: FLAT (Baseline)
+        if self.ontology_mode == "flat":
+            print(f"   Mode: FLAT (baseline)")
+            prompt = self._get_flat_prompt(text, domain)
+            return self._call_llm(prompt)
+
+        # Mode 2: STRUCTURED (2-Step Adaptive)
+        print(f"   Mode: STRUCTURED (2-Step Adaptive)")
+        
+        # Step 1: Schema Discovery
+        print("   📝 Step 1: Discovering Ontology Schema...")
+        schema_prompt = self._get_schema_discovery_prompt(text, domain)
+        schema_response = self._call_llm(schema_prompt)
+        
+        try:
+            # Extract JSON from response
+            if "```json" in schema_response:
+                schema_json = re.search(r'```json\s*(.*?)\s*```', schema_response, re.DOTALL).group(1)
+            elif "```" in schema_response:
+                schema_json = re.search(r'```\s*(.*?)\s*```', schema_response, re.DOTALL).group(1)
+            else:
+                schema_json = schema_response
+                
+            schema = json.loads(schema_json)
+            print(f"      ✓ Schema discovered: {len(schema.get('classes', []))} classes, {len(schema.get('relationships', []))} props")
+            
+        except Exception as e:
+            print(f"      ⚠️ Schema parsing failed: {e}. Falling back to raw text.")
+            schema = schema_response # Use raw text as schema if JSON fails
+
+        # Step 2: Ontology Generation
+        print("   🏗️  Step 2: Building Ontology based on Schema...")
+        generation_prompt = self._get_ontology_generation_prompt(text, domain, schema)
+        return self._call_llm(generation_prompt, is_xml=True)
+
+    def _call_llm(self, prompt: str, is_xml: bool = False) -> str:
+        """Helper to call LLM and handle basic cleanup"""
+        try:
+            response = self.llm_client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are an expert ontology engineer."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=50000
+            )
+            
+            content = response.choices[0].message.content.strip()
+            
+            if is_xml:
+                # Extract XML
+                if "```xml" in content:
+                    content = re.search(r'```xml\s*(.*?)\s*```', content, re.DOTALL).group(1)
+                elif "```" in content:
+                    content = re.search(r'```\s*(.*?)\s*```', content, re.DOTALL).group(1)
+                
+                # Ensure XML declaration
+                if not content.startswith("<?xml"):
+                    content = '<?xml version="1.0"?>\n' + content
+                
+                # Auto-fix missing Ontology tag
+                if "<owl:Ontology" not in content and "<rdf:RDF" in content:
+                    insert_pos = content.find('>') + 1
+                    content = content[:insert_pos] + '\n  <owl:Ontology rdf:about=""/>' + content[insert_pos:]
+                
+                # Sanitize XML: Escape unescaped ampersands
+                # Finds '&' not followed by a valid entity reference
+                content = re.sub(r'&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)', '&amp;', content)
+            
+            return content
+            
+        except Exception as e:
+            print(f"❌ LLM error: {e}")
+            raise
+
+    def _get_flat_prompt(self, text: str, domain: str) -> str:
+        """Get FLAT FAQ prompt (baseline - no hierarchy/relationships)"""
+        return f"""You are an expert Ontology Engineer. Your task is to convert the provided text into a valid OWL ontology in RDF/XML format.
 
 ═══════════════════════════════════════════════════════════════════
 DOMAIN CONTEXT: {domain}
@@ -231,7 +311,6 @@ INPUT TEXT:
 ═══════════════════════════════════════════════════════════════════
 YOUR TASK: Analyze the text and extract ALL knowledge into OWL format
 ═══════════════════════════════════════════════════════════════════
-
 
 STEP 1: DETECT CONTENT TYPE (Follow this order - FIRST MATCH WINS)
 
@@ -254,75 +333,26 @@ CRITICAL: Create ONLY owl:Class elements (NO Properties, NO Individuals)
 - DO NOT create relationships between questions
 
 EXAMPLE (CORRECT FAQ Structure):
-'''xml
+```xml
 <owl:Class rdf:about="#FAQ_WhatIsStripe">
   <rdfs:label>What is Stripe?</rdfs:label>
-  <rdfs:comment>Stripe is a payment processing platform that allows businesses to accept payments online. When you see a charge from Stripe on your statement, it means a business using Stripe processed your payment.</rdfs:comment>
+  <rdfs:comment>Stripe is a payment processing platform that allows businesses to accept payments online.</rdfs:comment>
 </owl:Class>
 
 <owl:Class rdf:about="#FAQ_UnrecognizedCharge">
   <rdfs:label>What should I do if I don't recognize a charge from Stripe?</rdfs:label>
-  <rdfs:comment>Use the charge lookup tool at stripe.com/chargeid to identify which business processed the charge. Enter the charge ID from your bank statement to see the business name and description.</rdfs:comment>
+  <rdfs:comment>Use the charge lookup tool at stripe.com/chargeid to identify which business processed the charge.</rdfs:comment>
 </owl:Class>
-'''
+```
 
 WRONG FAQ Examples (DO NOT DO THIS):
 ❌ <owl:ObjectProperty rdf:about="#usesChargeLookupTool"> <!-- WRONG! -->
 ❌ <owl:NamedIndividual rdf:about="#Question1"> <!-- WRONG! -->
 ❌ Creating relationships between questions <!-- WRONG! -->
+❌ Using rdfs:subClassOf between FAQ classes <!-- WRONG! -->
 
 ═══════════════════════════════════════════════════════════════════
-PRIORITY 2: DOMAIN KNOWLEDGE / CONCEPTS
-═══════════════════════════════════════════════════════════════════
-IF NOT FAQ, check for:
-- Concept definitions and classifications
-- "is a" / "type of" hierarchical relationships
-- Formal taxonomy structure
-
-THEN create:
-- owl:Class for each concept
-- rdfs:subClassOf for hierarchies
-- rdfs:label and rdfs:comment for definitions
-
-EXAMPLE:
-'''xml
-<owl:Class rdf:about="#Mammal">
-  <rdfs:label>Mammal</rdfs:label>
-  <rdfs:comment>Warm-blooded vertebrate animal.</rdfs:comment>
-  <rdfs:subClassOf rdf:resource="#Animal"/>
-</owl:Class>
-'''
-
-═══════════════════════════════════════════════════════════════════
-PRIORITY 3: RELATIONSHIPS / PROCESSES
-═══════════════════════════════════════════════════════════════════
-IF content describes actions, connections, or processes between entities:
-
-'''xml
-<owl:ObjectProperty rdf:about="#processes">
-  <rdfs:label>processes</rdfs:label>
-  <rdfs:comment>Indicates that one entity processes another.</rdfs:comment>
-  <rdfs:domain rdf:resource="#PaymentProcessor"/>
-  <rdfs:range rdf:resource="#Payment"/>
-</owl:ObjectProperty>
-'''
-
-═══════════════════════════════════════════════════════════════════
-PRIORITY 4: CONCRETE EXAMPLES / INSTANCES
-═══════════════════════════════════════════════════════════════════
-IF content mentions specific real-world examples:
-
-'''xml
-<owl:NamedIndividual rdf:about="#Pacific_Ocean">
-  <rdf:type rdf:resource="#Ocean"/>
-  <rdfs:label>Pacific Ocean</rdfs:label>
-  <rdfs:comment>Largest ocean on Earth.</rdfs:comment>
-</owl:NamedIndividual>
-'''
-
-
-═══════════════════════════════════════════════════════════════════
-CRITICAL XML/OWL REQUIREMENTS (MUST FOLLOW EXACTLY):
+CRITICAL XML/OWL REQUIREMENTS:
 ═══════════════════════════════════════════════════════════════════
 
 1. STRUCTURE:
@@ -338,25 +368,8 @@ CRITICAL XML/OWL REQUIREMENTS (MUST FOLLOW EXACTLY):
    xmlns:owl="http://www.w3.org/2002/07/owl#"
    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
 
-3. URI FORMAT:
-   - Use descriptive names: #WhatIsPython NOT #Class001
-   - Use CamelCase or Underscores: #What_Is_Python or #WhatIsPython
-   - No spaces, no special chars except underscore
-   - Must start with # for local URIs
-
-4. REQUIRED ANNOTATIONS:
-   - Every owl:Class MUST have rdfs:label
-   - Every owl:Class SHOULD have rdfs:comment (if information available)
-   - Use rdfs:comment for definitions, descriptions, answers
-
-5. XML SYNTAX:
-   - Self-closing tags: <owl:Ontology rdf:about=""/>
-   - Proper nesting: close inner tags before outer tags
-   - Escape special characters: &lt; &gt; &amp; &quot; &apos;
-   - No unclosed tags
-
 ═══════════════════════════════════════════════════════════════════
-OUTPUT FORMAT TEMPLATE:
+OUTPUT TEMPLATE:
 ═══════════════════════════════════════════════════════════════════
 
 <?xml version="1.0"?>
@@ -369,84 +382,132 @@ OUTPUT FORMAT TEMPLATE:
     
   <owl:Ontology rdf:about=""/>
   
-  <!-- Your OWL entities here -->
+  <!-- Flat FAQ Classes - NO hierarchy, NO relationships -->
   
 </rdf:RDF>
-
-═══════════════════════════════════════════════════════════════════
-QUALITY CHECKLIST (verify before outputting):
-═══════════════════════════════════════════════════════════════════
-
-✓ XML declaration present
-✓ All 5 namespaces declared (xmlns, rdf, rdfs, owl, xsd)
-✓ <owl:Ontology/> element present
-✓ All tags properly closed
-✓ All URIs start with #
-✓ All Classes have rdfs:label
-✓ No placeholder content (replace "..." with actual content)
-✓ Special characters properly escaped
 
 ═══════════════════════════════════════════════════════════════════
 FINAL INSTRUCTION:
 ═══════════════════════════════════════════════════════════════════
 
-Output ONLY the raw XML. Do NOT use markdown code blocks. Do NOT add explanations before or after.
+Output ONLY the raw XML. Do NOT use markdown code blocks. Do NOT add explanations.
 Begin your response with: <?xml version="1.0"?>
 """
+    
+    def _get_schema_discovery_prompt(self, text: str, domain: str) -> str:
+        """Step 1: Analyze text and design Ontology Schema (Goal-Oriented)"""
+        return f"""Analyze the provided text and design an Ontology Schema that captures ALL knowledge needed to answer user questions.
 
+═══════════════════════════════════════════════════════════════════
+DOMAIN CONTEXT: {domain}
+═══════════════════════════════════════════════════════════════════
 
-        print("🤖 Generating ontology with LLM...")
-        print(f"   Model: {self.model}")
-        print(f"   Text length: {len(text)} chars")
-        
-        try:
-            response = self.llm_client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are an expert ontology engineer who generates valid OWL/XML ontologies."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.3,  # Lower temperature for more structured output
-                max_tokens=50000  # Maximum allowed by API (56000 limit, use 50000 for safety)
-            )
-            
-            owl_content = response.choices[0].message.content.strip()
-            
-            # Log token usage
-            if hasattr(response, 'usage'):
-                print(f"   Tokens - Input: {response.usage.prompt_tokens}, Output: {response.usage.completion_tokens}, Total: {response.usage.total_tokens}")
-                if response.choices[0].finish_reason:
-                    print(f"   Finish reason: {response.choices[0].finish_reason}")
-            
-            # Extract XML if wrapped in markdown code blocks
-            if "```xml" in owl_content:
-                owl_content = re.search(r'```xml\s*(.*?)\s*```', owl_content, re.DOTALL)
-                if owl_content:
-                    owl_content = owl_content.group(1)
-            elif "```" in owl_content:
-                owl_content = re.search(r'```\s*(.*?)\s*```', owl_content, re.DOTALL)
-                if owl_content:
-                    owl_content = owl_content.group(1)
-            
-            # Ensure it starts with XML declaration
-            if not owl_content.startswith("<?xml"):
-                owl_content = '<?xml version="1.0"?>\n' + owl_content
-            
-            # Auto-fix: Add <owl:Ontology> if missing
-            if "<owl:Ontology" not in owl_content and "<Ontology" not in owl_content:
-                # Insert after <rdf:RDF ...> opening tag
-                import re
-                match = re.search(r'(<rdf:RDF[^>]*>)', owl_content, re.DOTALL)
-                if match:
-                    insertion_point = match.end()
-                    owl_ontology_tag = '\n  <owl:Ontology rdf:about=""/>\n'
-                    owl_content = owl_content[:insertion_point] + owl_ontology_tag + owl_content[insertion_point:]
-                    print("   ℹ️  Auto-added missing <owl:Ontology> element")
-            
-            return owl_content
-            
-        except Exception as e:
-            raise ValueError(f"LLM generation failed: {e}")
+INPUT TEXT:
+{text}
+
+═══════════════════════════════════════════════════════════════════
+YOUR TASK: Design a Schema for Actionable Knowledge
+═══════════════════════════════════════════════════════════════════
+
+Imagine a user asking "How do I...?", "When...?", "Why...?", or "What is...?".
+Design a schema that can capture the answers to these questions.
+
+Your schema MUST cover:
+1. **CONCEPTS (Nouns)**: The things/entities involved.
+2. **ACTIONS/TASKS (Verbs)**: What can be done? (Crucial for DSL mapping later).
+   - e.g., "Cancel Subscription", "Refund Charge".
+3. **PROCEDURES (Workflows)**: Steps to complete a task.
+4. **RULES/CONDITIONS**: When is an action allowed? (e.g., "within 60 days").
+5. **QUANTITATIVE DATA**: Any numbers, prices, durations, deadlines.
+   - Define specific attributes for these (e.g., hasDuration, hasCost).
+6. **KEY FACTS / ASSERTIONS**: Important statements/rules that don't fit into simple structures.
+   - e.g., "Issuer decides refund timing", "Stripe cannot refund directly".
+   - Model these as instances of a 'Fact' or 'Assertion' class.
+
+Output a JSON object with the schema design.
+
+EXAMPLE OUTPUT FORMAT:
+{{
+  "classes": [
+    {{ "name": "PaymentPlatform", "description": "System processing payments" }},
+    {{ "name": "RefundAction", "description": "Task of returning funds" }}
+  ],
+  "relationships": [
+    {{ "name": "performs", "domain": "User", "range": "Action" }},
+    {{ "name": "requiresCondition", "domain": "Action", "range": "Condition" }}
+  ],
+  "attributes": [
+    {{ "name": "duration", "type": "string" }},
+    {{ "name": "amount", "type": "decimal" }}
+  ],
+  "special_structures": "Model 'Refund Process' as a sequence of Actions. Capture 'TimeLimit' as a condition."
+}}
+
+Output ONLY the JSON.
+"""
+
+    def _get_ontology_generation_prompt(self, text: str, domain: str, schema: Any) -> str:
+        """Step 2: Generate OWL based on Schema"""
+        return f"""You are an expert Ontology Engineer. Convert the provided text into a valid OWL ontology based on the DESIGN SCHEMA.
+
+═══════════════════════════════════════════════════════════════════
+DESIGN SCHEMA (Follow this structure):
+═══════════════════════════════════════════════════════════════════
+{json.dumps(schema, indent=2) if isinstance(schema, dict) else schema}
+
+═══════════════════════════════════════════════════════════════════
+INPUT TEXT:
+═══════════════════════════════════════════════════════════════════
+{text}
+
+═══════════════════════════════════════════════════════════════════
+INSTRUCTIONS:
+═══════════════════════════════════════════════════════════════════
+
+1. Create owl:Class for each concept in the schema
+2. Create owl:ObjectProperty for each relationship in the schema
+3. Create owl:DatatypeProperty for each attribute in the schema
+4. Implement any special structures defined in the schema
+5. POPULATE the ontology with specific INSTANCES (owl:NamedIndividual) extracted from the text
+   - Extract ALL specific values, tools, entities mentioned
+   - Link them using the defined properties
+
+CRITICAL REQUIREMENT:
+Every <owl:Class> and <owl:NamedIndividual> MUST have an <rdfs:comment> 
+containing a natural language description. This is essential for search.
+
+Example:
+<owl:NamedIndividual rdf:about="#Stripe">
+  <rdfs:comment>A technology company that builds economic infrastructure for the internet.</rdfs:comment>
+  ...
+</owl:NamedIndividual>
+
+═══════════════════════════════════════════════════════════════════
+REQUIRED NAMESPACES:
+═══════════════════════════════════════════════════════════════════
+xmlns="http://example.org/ontology#"
+xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+xmlns:owl="http://www.w3.org/2002/07/owl#"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+
+═══════════════════════════════════════════════════════════════════
+OUTPUT TEMPLATE:
+═══════════════════════════════════════════════════════════════════
+<?xml version="1.0"?>
+<rdf:RDF ...>
+  <owl:Ontology rdf:about=""/>
+  
+  <!-- Classes -->
+  
+  <!-- Properties -->
+  
+  <!-- Instances (The most important part!) -->
+  
+</rdf:RDF>
+
+Output ONLY the raw XML. Begin with <?xml version="1.0"?>
+"""
     
     def validate_owl(self, owl_content: str) -> Dict[str, Any]:
         """
