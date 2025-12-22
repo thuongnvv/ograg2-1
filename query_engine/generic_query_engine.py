@@ -224,6 +224,7 @@ class GenericQueryEngine:
         # Smart Context: Add parent terms if requested (up to 2 parents per main term)
         if expand_hierarchy and results:
             parent_results = []
+            seen_term_ids = {r['term_id'] for r in results}  # Track existing terms
             
             for result in results:
                 raw_term = result['fact']['_raw_term']
@@ -237,6 +238,10 @@ class GenericQueryEngine:
                     for parent_id in parents:
                         if term_parents_added >= 2:
                             break
+                        
+                        # Skip if already retrieved or added
+                        if parent_id in seen_term_ids:
+                            continue
                             
                         # Find parent chunks
                         for fact in self.facts:
@@ -249,10 +254,11 @@ class GenericQueryEngine:
                                     '_is_parent': True,
                                     '_parent_of': result['term_id']
                                 })
+                                seen_term_ids.add(fact_term_id)
                                 term_parents_added += 1
                                 break
             
-            # Add parent terms as additional context (keep main terms + add parents)
+            # Add unique parent terms
             results.extend(parent_results)
         
         # IMPORTANT: Re-sort by relevance score after adding parent terms
@@ -383,6 +389,20 @@ class GenericQueryEngine:
         if 'cross_references' in raw_term and raw_term['cross_references']:
             xrefs = raw_term['cross_references'][:5]  # Max 5
             lines.append(f"\nCross-references: {', '.join(xrefs)}")
+            
+        # Custom Properties (NEW)
+        if 'properties' in raw_term and raw_term['properties']:
+            lines.append("\nProperties:")
+            for prop_name, values in raw_term['properties'].items():
+                # Ensure values is list
+                if not isinstance(values, list):
+                    values = [values]
+                for val in values:
+                    # Truncate long values
+                    val_str = str(val)
+                    if len(val_str) > 300:
+                        val_str = val_str[:300] + '...'
+                    lines.append(f"  • {prop_name}: {val_str}")
         
         return "\n".join(lines)
     
