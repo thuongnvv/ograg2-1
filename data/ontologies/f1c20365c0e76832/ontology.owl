@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns="http://example.org/ontology#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+    
+  <owl:Ontology rdf:about=""/>
+  
+  <!-- Flat FAQ Classes - NO hierarchy, NO relationships -->
+  
+  <owl:Class rdf:about="#FAQ_WhatIsStripe">
+    <rdfs:label>What is Stripe?</rdfs:label>
+    <rdfs:comment>Stripe is a payment service provider that millions of businesses use to accept payments, send payouts, and manage their businesses online. You might see a charge on your bank statement saying &quot;STRIPE&quot;. In most cases, you&#39;ve purchased something from a business that uses Stripe to process their payments and the business name wasn&#39;t reflected correctly on your bank statement.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_UnrecognizedCharge">
+    <rdfs:label>What should I do if I don't recognize a charge from Stripe?</rdfs:label>
+    <rdfs:comment>If you notice an unknown charge saying &quot;STRIPE&quot; on your bank statement and you&#39;re unsure which business has charged you, you can use our secure charge lookup tool to search for the business.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_OneDollarCharge">
+    <rdfs:label>Why is there a $1 charge on my bank statement?</rdfs:label>
+    <rdfs:comment>Customers may sometimes notice a pending charge of $1 on their bank statements as part of the card authorization process. This is a temporary authorization charge that will eventually be removed from the statement. Stripe sends a request to the customer&#39;s bank for a $0, $1, or similar amount to verify the validity of the card and ensure it can be authorized by the bank.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_BusinessProcessingIssues">
+    <rdfs:label>What should I do if the business is having issues processing my payment?</rdfs:label>
+    <rdfs:comment>Contact the business you were attempting to make a purchase with. They can investigate the issue and, if necessary, reach out to Stripe for assistance.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_GetRefund">
+    <rdfs:label>How do I get a refund?</rdfs:label>
+    <rdfs:comment>Stripe is unable to issue refunds on behalf of businesses. To initiate a refund, you&#39;ll need to contact the business directly. See Privacy Practices for Refunds to End Customer Bank Accounts (End Customers) for more information.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_CancelSubscription">
+    <rdfs:label>How do I cancel subscriptions from a business using Stripe?</rdfs:label>
+    <rdfs:comment>Stripe is not authorized to cancel subscriptions on behalf of the businesses using Stripe. If you have a recurring subscription charge on your bank statement from a business using Stripe that you would like to cancel, you&#39;ll need to contact the business directly.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_IssueWithPurchase">
+    <rdfs:label>What should I do if I have an issue with a purchase I made?</rdfs:label>
+    <rdfs:comment>If you are facing an issue with a purchase, require an update on an order, or have not yet received your item, we suggest reaching out to the business directly to resolve the issue. You can utilize the charge lookup tool to obtain their contact information. If the business remains unresponsive, we recommend contacting your bank for assistance, as they may offer guidance on how to proceed, including the possibility of initiating a dispute.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_UnrecognizedChargeNoResponse">
+    <rdfs:label>I don't recognize a charge and I've tried to get in touch with the business. How can I get my money back?</rdfs:label>
+    <rdfs:comment>Stripe is not authorized to issue a refund on behalf of the business. Reach out to your bank for next steps if you are unable to get in touch with the business, they are unresponsive, or you believe the business might be fraudulent. Your bank may have recommendations for how to proceed, such as opening a dispute.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_VictimOfFraud">
+    <rdfs:label>I was a victim of fraud. What should I do?</rdfs:label>
+    <rdfs:comment>If you believe you have been a victim of fraud, report the fraudulent charge to your bank and file a dispute. When you file a dispute, your bank passes all relevant details to Stripe. We use this data in our ongoing effort to combat fraud.</rdfs:comment>
+  </owl:Class>
+  
+  <owl:Class rdf:about="#FAQ_DisputedPayment">
+    <rdfs:label>I disputed a payment. When will I get my money back?</rdfs:label>
+    <rdfs:comment>When a card issuer creates a dispute on your behalf, the card network immediately debits Stripe for the disputed amount. From that point forward, it&#39;s up to the card issuer to decide when they return funds to their cardholder.</rdfs:comment>
+  </owl:Class>
+  
+</rdf:RDF>

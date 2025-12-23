@@ -1,0 +1,579 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.org/ontology#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+
+  <owl:Ontology rdf:about=""/>
+
+  <!-- Classes -->
+  <owl:Class rdf:about="#PaymentPlatform">
+    <rdfs:comment>System that processes payments for merchants (e.g., Stripe).</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Business">
+    <rdfs:comment>Merchant that uses a PaymentPlatform to accept payments.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Customer">
+    <rdfs:comment>End‑user who makes purchases through a Business.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Charge">
+    <rdfs:comment>A monetary request sent from a Business to a Customer’s card.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Authorization">
+    <rdfs:comment>A temporary hold placed on a card (e.g., $0, $1) to verify validity.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Refund">
+    <rdfs:comment>Return of funds for a previously captured Charge.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Subscription">
+    <rdfs:comment>Recurring Charge set up by a Business for a Customer.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Dispute">
+    <rdfs:comment>A claim by a Customer’s card issuer that a Charge is invalid.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#FraudReport">
+    <rdfs:comment>Report of a suspected fraudulent Charge.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Bank">
+    <rdfs:comment>Financial institution that holds the Customer’s account.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#CardIssuer">
+    <rdfs:comment>Bank that issued the Customer’s payment card.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#CardNetwork">
+    <rdfs:comment>Network (Visa, Mastercard, etc.) that routes payment messages.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Tool">
+    <rdfs:comment>Software utility provided by the PaymentPlatform (e.g., Charge Lookup Tool).</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#SupportChannel">
+    <rdfs:comment>Means of contacting support (e.g., Discord, 24×7 staff).</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Action">
+    <rdfs:comment>Verbalizable task that an actor can perform (e.g., RequestRefund, CancelSubscription).</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Procedure">
+    <rdfs:comment>Ordered workflow composed of one or more Actions.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Condition">
+    <rdfs:comment>Rule or constraint that must be satisfied for an Action or Procedure.</rdfs:comment>
+  </owl:Class>
+
+  <owl:Class rdf:about="#Fact">
+    <rdfs:comment>Atomic assertion about the domain that does not fit into other structures.</rdfs:comment>
+  </owl:Class>
+
+  <!-- Object Properties -->
+  <owl:ObjectProperty rdf:about="#usesPlatform">
+    <rdfs:domain rdf:resource="#Business"/>
+    <rdfs:range rdf:resource="#PaymentPlatform"/>
+    <rdfs:comment>Business employs a PaymentPlatform to process payments.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#makesCharge">
+    <rdfs:domain rdf:resource="#Business"/>
+    <rdfs:range rdf:resource="#Charge"/>
+    <rdfs:comment>Business creates a Charge for a Customer.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#receivesCharge">
+    <rdfs:domain rdf:resource="#Customer"/>
+    <rdfs:range rdf:resource="#Charge"/>
+    <rdfs:comment>Customer is presented with a Charge.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#linkedTo">
+    <rdfs:domain rdf:resource="#Charge"/>
+    <rdfs:range rdf:resource="#Business"/>
+    <rdfs:comment>Charge is associated with the Business that originated it.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#hasAuthorization">
+    <rdfs:domain rdf:resource="#Charge"/>
+    <rdfs:range rdf:resource="#Authorization"/>
+    <rdfs:comment>Charge may include a temporary Authorization (e.g., $1).</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#initiates">
+    <rdfs:domain rdf:resource="#Customer"/>
+    <rdfs:range rdf:resource="#Action"/>
+    <rdfs:comment>Customer starts an Action (e.g., RequestRefund).</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#performs">
+    <rdfs:domain rdf:resource="#Business"/>
+    <rdfs:range rdf:resource="#Action"/>
+    <rdfs:comment>Business carries out an Action (e.g., IssueRefund).</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#contacts">
+    <rdfs:domain rdf:resource="#Customer"/>
+    <rdfs:range rdf:resource="#Business"/>
+    <rdfs:comment>Customer reaches out to Business for assistance.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#reportsTo">
+    <rdfs:domain rdf:resource="#Customer"/>
+    <rdfs:range rdf:resource="#Bank"/>
+    <rdfs:comment>Customer reports a problem (e.g., fraud) to their Bank.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#filesDispute">
+    <rdfs:domain rdf:resource="#Customer"/>
+    <rdfs:range rdf:resource="#Dispute"/>
+    <rdfs:comment>Customer’s CardIssuer creates a Dispute on the Customer’s behalf.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#debitedFrom">
+    <rdfs:domain rdf:resource="#Dispute"/>
+    <rdfs:range rdf:resource="#PaymentPlatform"/>
+    <rdfs:comment>When a Dispute is opened, the CardNetwork immediately debits the PaymentPlatform.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#decidedBy">
+    <rdfs:domain rdf:resource="#Refund"/>
+    <rdfs:range rdf:resource="#CardIssuer"/>
+    <rdfs:comment>Timing of refund return is decided by the CardIssuer.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#usesTool">
+    <rdfs:domain rdf:resource="#Customer"/>
+    <rdfs:range rdf:resource="#Tool"/>
+    <rdfs:comment>Customer employs a Tool such as the Charge Lookup Tool.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#providesSupport">
+    <rdfs:domain rdf:resource="#PaymentPlatform"/>
+    <rdfs:range rdf:resource="#SupportChannel"/>
+    <rdfs:comment>PaymentPlatform offers support via various channels.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#triggers">
+    <rdfs:domain rdf:resource="#Action"/>
+    <rdfs:range rdf:resource="#Procedure"/>
+    <rdfs:comment>An Action initiates a Procedure (e.g., RequestRefund triggers RefundProcedure).</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#hasStep">
+    <rdfs:domain rdf:resource="#Procedure"/>
+    <rdfs:range rdf:resource="#Action"/>
+    <rdfs:comment>Ordered step within a Procedure.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#requiresCondition">
+    <rdfs:domain rdf:resource="#Action"/>
+    <rdfs:range rdf:resource="#Condition"/>
+    <rdfs:comment>Condition that must hold for the Action to be permissible.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#hasCondition">
+    <rdfs:domain rdf:resource="#Procedure"/>
+    <rdfs:range rdf:resource="#Condition"/>
+    <rdfs:comment>Condition that must hold for the Procedure to be executed.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="#assertsFact">
+    <rdfs:domain rdf:resource="#Fact"/>
+    <rdfs:range rdf:resource="xsd:string"/>
+    <rdfs:comment>Human‑readable statement of a key fact.</rdfs:comment>
+  </owl:ObjectProperty>
+
+  <!-- Datatype Properties -->
+  <owl:DatatypeProperty rdf:about="#name">
+    <rdfs:comment>Human‑readable name of an instance.</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#description">
+    <rdfs:comment>Detailed description.</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#amount">
+    <rdfs:comment>Monetary value associated with a Charge, Authorization, Refund, or Dispute.</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#currency">
+    <rdfs:comment>ISO currency code (e.g., USD).</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#status">
+    <rdfs:comment>Current state (e.g., pending, completed, cancelled).</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#date">
+    <rdfs:comment>Date the entity was created or an event occurred.</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#durationDays">
+    <rdfs:comment>Number of days a condition or temporary hold lasts.</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#isTemporary">
+    <rdfs:comment>Indicates whether an Authorization is a temporary hold.</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#timeLimitDays">
+    <rdfs:comment>Maximum number of days an Action may be performed after an event (e.g., refund window).</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <owl:DatatypeProperty rdf:about="#appearsOnStatementAs">
+    <rdfs:comment>Text shown on the bank statement for a Charge.</rdfs:comment>
+  </owl:DatatypeProperty>
+
+  <!-- Instances -->
+  <!-- Payment Platform -->
+  <owl:NamedIndividual rdf:about="#Stripe">
+    <rdf:type rdf:resource="#PaymentPlatform"/>
+    <name>Stripe</name>
+    <description>Payment service provider that millions of businesses use to accept payments, send payouts, and manage their businesses online.</description>
+    <rdfs:comment>A payment platform used by many merchants to process online payments.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Tool -->
+  <owl:NamedIndividual rdf:about="#ChargeLookupTool">
+    <rdf:type rdf:resource="#Tool"/>
+    <name>Charge Lookup Tool</name>
+    <description>Secure tool that lets a customer search for the business associated with a charge appearing as “STRIPE”.</description>
+    <rdfs:comment>Software utility provided by Stripe to help customers identify the merchant behind a charge.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Support Channels -->
+  <owl:NamedIndividual rdf:about="#Discord">
+    <rdf:type rdf:resource="#SupportChannel"/>
+    <name>Discord</name>
+    <description>Developer chat platform where Stripe staff provide assistance.</description>
+    <rdfs:comment>Online community channel used for support.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#SupportStaff24x7">
+    <rdf:type rdf:resource="#SupportChannel"/>
+    <name>24×7 Support Staff</name>
+    <description>Round‑the‑clock human support provided by Stripe.</description>
+    <rdfs:comment>Human support channel available 24/7.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Business -->
+  <owl:NamedIndividual rdf:about="#BusinessUsingStripe">
+    <rdf:type rdf:resource="#Business"/>
+    <name>Business Using Stripe</name>
+    <description>A merchant that processes payments through Stripe.</description>
+    <rdfs:comment>Generic business entity that employs Stripe as its payment platform.</rdfs:comment>
+    <usesPlatform rdf:resource="#Stripe"/>
+  </owl:NamedIndividual>
+
+  <!-- Customer -->
+  <owl:NamedIndividual rdf:about="#GenericCustomer">
+    <rdf:type rdf:resource="#Customer"/>
+    <name>Generic Customer</name>
+    <description>An end‑user who purchases from a business that uses Stripe.</description>
+    <rdfs:comment>Typical consumer interacting with a Stripe‑enabled merchant.</rdfs:comment>
+    <usesTool rdf:resource="#ChargeLookupTool"/>
+  </owl:NamedIndividual>
+
+  <!-- Bank -->
+  <owl:NamedIndividual rdf:about="#GenericBank">
+    <rdf:type rdf:resource="#Bank"/>
+    <name>Generic Bank</name>
+    <description>Financial institution that holds the customer’s account.</description>
+    <rdfs:comment>Bank that can be contacted for disputes or fraud reports.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Card Issuer -->
+  <owl:NamedIndividual rdf:about="#GenericCardIssuer">
+    <rdf:type rdf:resource="#CardIssuer"/>
+    <name>Generic Card Issuer</name>
+    <description>Bank that issued the customer’s payment card.</description>
+    <rdfs:comment>Entity that decides on refunds and creates disputes.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Card Network -->
+  <owl:NamedIndividual rdf:about="#GenericCardNetwork">
+    <rdf:type rdf:resource="#CardNetwork"/>
+    <name>Generic Card Network</name>
+    <description>Network (e.g., Visa, Mastercard) that routes payment messages.</description>
+    <rdfs:comment>Facilitates the debit of Stripe when a dispute is opened.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Authorization ($1 temporary hold) -->
+  <owl:NamedIndividual rdf:about="#AuthOneDollar">
+    <rdf:type rdf:resource="#Authorization"/>
+    <name>$1 Temporary Authorization</name>
+    <description>Temporary $1 hold placed on the card to verify its validity.</description>
+    <amount rdf:datatype="xsd:decimal">1.00</amount>
+    <currency>USD</currency>
+    <isTemporary rdf:datatype="xsd:boolean">true</isTemporary>
+    <durationDays rdf:datatype="xsd:integer">7</durationDays>
+    <rdfs:comment>Represents the $1 authorization charge described in the FAQ.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Charge -->
+  <owl:NamedIndividual rdf:about="#SampleCharge">
+    <rdf:type rdf:resource="#Charge"/>
+    <name>Sample Charge</name>
+    <description>A charge that appears on the customer’s statement as “STRIPE”.</description>
+    <amount rdf:datatype="xsd:decimal">25.00</amount>
+    <currency>USD</currency>
+    <appearsOnStatementAs>STRIPE</appearsOnStatementAs>
+    <linkedTo rdf:resource="#BusinessUsingStripe"/>
+    <hasAuthorization rdf:resource="#AuthOneDollar"/>
+    <rdfs:comment>Illustrative charge used for modeling.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Refund -->
+  <owl:NamedIndividual rdf:about="#SampleRefund">
+    <rdf:type rdf:resource="#Refund"/>
+    <name>Sample Refund</name>
+    <description>Refund for the Sample Charge.</description>
+    <amount rdf:datatype="xsd:decimal">25.00</amount>
+    <currency>USD</currency>
+    <status>pending</status>
+    <decidedBy rdf:resource="#GenericCardIssuer"/>
+    <rdfs:comment>Refund whose timing is decided by the card issuer.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Dispute -->
+  <owl:NamedIndividual rdf:about="#SampleDispute">
+    <rdf:type rdf:resource="#Dispute"/>
+    <name>Sample Dispute</name>
+    <description>Dispute opened by the card issuer for the Sample Charge.</description>
+    <amount rdf:datatype="xsd:decimal">25.00</amount>
+    <currency>USD</currency>
+    <status>open</status>
+    <debitedFrom rdf:resource="#Stripe"/>
+    <rdfs:comment>Dispute that triggers a debit from Stripe.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Fraud Report -->
+  <owl:NamedIndividual rdf:about="#SampleFraudReport">
+    <rdf:type rdf:resource="#FraudReport"/>
+    <name>Sample Fraud Report</name>
+    <description>Report of a suspected fraudulent $1 authorization.</description>
+    <rdfs:comment>Represents a fraud report filed by the customer.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Subscription -->
+  <owl:NamedIndividual rdf:about="#SampleSubscription">
+    <rdf:type rdf:resource="#Subscription"/>
+    <name>Sample Subscription</name>
+    <description>Recurring charge set up by the business for the customer.</description>
+    <amount rdf:datatype="xsd:decimal">9.99</amount>
+    <currency>USD</currency>
+    <status>active</status>
+    <rdfs:comment>Illustrative subscription.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Actions -->
+  <owl:NamedIndividual rdf:about="#RequestRefund">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Request Refund</name>
+    <description>Customer asks the business to issue a refund.</description>
+    <rdfs:comment>Action initiated by the customer to obtain a refund.</rdfs:comment>
+    <initiates rdf:resource="#GenericCustomer"/>
+    <triggers rdf:resource="#RefundProcedure"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#CancelSubscription">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Cancel Subscription</name>
+    <description>Customer asks the business to cancel a recurring subscription.</description>
+    <rdfs:comment>Action to stop future recurring charges.</rdfs:comment>
+    <initiates rdf:resource="#GenericCustomer"/>
+    <triggers rdf:resource="#CancelSubscriptionProcedure"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#InitiateDispute">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Initiate Dispute</name>
+    <description>Customer asks their bank/card issuer to open a dispute.</description>
+    <rdfs:comment>Action that leads to a dispute being created.</rdfs:comment>
+    <initiates rdf:resource="#GenericCustomer"/>
+    <triggers rdf:resource="#DisputeProcedure"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#ReportFraud">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Report Fraud</name>
+    <description>Customer reports a suspected fraudulent charge to their bank.</description>
+    <rdfs:comment>Action that creates a fraud report.</rdfs:comment>
+    <initiates rdf:resource="#GenericCustomer"/>
+    <triggers rdf:resource="#FraudProcedure"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#ContactBusiness">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Contact Business</name>
+    <description>Customer reaches out to the merchant for assistance.</description>
+    <rdfs:comment>Direct communication with the merchant.</rdfs:comment>
+    <initiates rdf:resource="#GenericCustomer"/>
+    <triggers rdf:resource="#ContactBusinessProcedure"/>
+  </owl:NamedIndividual>
+
+  <!-- Procedures -->
+  <owl:NamedIndividual rdf:about="#RefundProcedure">
+    <rdf:type rdf:resource="#Procedure"/>
+    <name>Refund Procedure</name>
+    <description>Workflow that processes a refund after a customer request.</description>
+    <rdfs:comment>Procedure triggered by RequestRefund.</rdfs:comment>
+    <hasStep rdf:resource="#RequestRefund"/>
+    <hasStep rdf:resource="#IssueRefund"/>
+    <hasCondition rdf:resource="#RefundTimeLimit"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#CancelSubscriptionProcedure">
+    <rdf:type rdf:resource="#Procedure"/>
+    <name>Cancel Subscription Procedure</name>
+    <description>Workflow to cancel a recurring subscription.</description>
+    <rdfs:comment>Procedure triggered by CancelSubscription.</rdfs:comment>
+    <hasStep rdf:resource="#CancelSubscription"/>
+    <hasStep rdf:resource="#ConfirmCancellation"/>
+    <hasCondition rdf:resource="#CancellationPolicy"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#DisputeProcedure">
+    <rdf:type rdf:resource="#Procedure"/>
+    <name>Dispute Procedure</name>
+    <description>Workflow that handles a dispute opened by the card issuer.</description>
+    <rdfs:comment>Procedure triggered by InitiateDispute.</rdfs:comment>
+    <hasStep rdf:resource="#InitiateDispute"/>
+    <hasStep rdf:resource="#ReviewDispute"/>
+    <hasCondition rdf:resource="#DisputeTimeWindow"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#FraudProcedure">
+    <rdf:type rdf:resource="#Procedure"/>
+    <name>Fraud Handling Procedure</name>
+    <description>Workflow that processes a fraud report.</description>
+    <rdfs:comment>Procedure triggered by ReportFraud.</rdfs:comment>
+    <hasStep rdf:resource="#ReportFraud"/>
+    <hasStep rdf:resource="#InvestigateFraud"/>
+    <hasCondition rdf:resource="#FraudInvestigationPolicy"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#ContactBusinessProcedure">
+    <rdf:type rdf:resource="#Procedure"/>
+    <name>Contact Business Procedure</name>
+    <description>Workflow for a customer to contact the merchant and, if needed, escalate to the bank.</description>
+    <rdfs:comment>Procedure triggered by ContactBusiness.</rdfs:comment>
+    <hasStep rdf:resource="#ContactBusiness"/>
+    <hasStep rdf:resource="#EscalateToBank"/>
+    <hasCondition rdf:resource="#ResponseTimePolicy"/>
+  </owl:NamedIndividual>
+
+  <!-- Additional Action steps used in procedures -->
+  <owl:NamedIndividual rdf:about="#IssueRefund">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Issue Refund</name>
+    <description>Business processes the refund and notifies the card issuer.</description>
+    <rdfs:comment>Business‑performed step of the Refund Procedure.</rdfs:comment>
+    <performs rdf:resource="#BusinessUsingStripe"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#ConfirmCancellation">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Confirm Cancellation</name>
+    <description>Business confirms that the subscription has been cancelled.</description>
+    <rdfs:comment>Business‑performed step of the Cancel Subscription Procedure.</rdfs:comment>
+    <performs rdf:resource="#BusinessUsingStripe"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#ReviewDispute">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Review Dispute</name>
+    <description>Card network and issuer review the dispute details.</description>
+    <rdfs:comment>Step within the Dispute Procedure.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#InvestigateFraud">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Investigate Fraud</name>
+    <description>Stripe investigates the reported fraudulent charge.</description>
+    <rdfs:comment>Step within the Fraud Handling Procedure.</rdfs:comment>
+    <performs rdf:resource="#Stripe"/>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#EscalateToBank">
+    <rdf:type rdf:resource="#Action"/>
+    <name>Escalate to Bank</name>
+    <description>Customer asks their bank to intervene when the business does not respond.</description>
+    <rdfs:comment>Step in the Contact Business Procedure.</rdfs:comment>
+    <initiates rdf:resource="#GenericCustomer"/>
+  </owl:NamedIndividual>
+
+  <!-- Conditions -->
+  <owl:NamedIndividual rdf:about="#RefundTimeLimit">
+    <rdf:type rdf:resource="#Condition"/>
+    <name>Refund Time Limit</name>
+    <description>Refund must be requested within 30 days of the charge.</description>
+    <timeLimitDays rdf:datatype="xsd:integer">30</timeLimitDays>
+    <rdfs:comment>Temporal condition for refunds.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#CancellationPolicy">
+    <rdf:type rdf:resource="#Condition"/>
+    <name>Cancellation Policy</name>
+    <description>Subscription can be cancelled at any time by the customer.</description>
+    <rdfs:comment>Policy condition for cancelling subscriptions.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#DisputeTimeWindow">
+    <rdf:type rdf:resource="#Condition"/>
+    <name>Dispute Time Window</name>
+    <description>Dispute must be filed within 60 days of the charge date.</description>
+    <timeLimitDays rdf:datatype="xsd:integer">60</timeLimitDays>
+    <rdfs:comment>Temporal constraint for opening disputes.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#FraudInvestigationPolicy">
+    <rdf:type rdf:resource="#Condition"/>
+    <name>Fraud Investigation Policy</name>
+    <description>All reported fraud cases are investigated within 7 days.</description>
+    <durationDays rdf:datatype="xsd:integer">7</durationDays>
+    <rdfs:comment>Policy governing fraud investigations.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#ResponseTimePolicy">
+    <rdf:type rdf:resource="#Condition"/>
+    <name>Response Time Policy</name>
+    <description>Business should respond to customer inquiries within 5 business days.</description>
+    <durationDays rdf:datatype="xsd:integer">5</durationDays>
+    <rdfs:comment>Condition for the Contact Business Procedure.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Facts -->
+  <owl:NamedIndividual rdf:about="#FactStripeCannotRefund">
+    <rdf:type rdf:resource="#Fact"/>
+    <assertsFact rdf:datatype="xsd:string">Stripe is not authorized to issue refunds on behalf of businesses.</assertsFact>
+    <rdfs:comment>Key factual statement extracted from the FAQ.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <owl:NamedIndividual rdf:about="#FactStripeCannotCancelSubscription">
+    <rdf:type rdf:resource="#Fact"/>
+    <assertsFact rdf:datatype="xsd:string">Stripe is not authorized to cancel subscriptions on behalf of businesses.</assertsFact>
+    <rdfs:comment>Key factual statement extracted from the FAQ.</rdfs:comment>
+  </owl:NamedIndividual>
+
+  <!-- Linking support channels to Stripe -->
+  <owl:NamedIndividual rdf:about="#StripeSupportLinks">
+    <rdf:type rdf:resource="#PaymentPlatform"/>
+    <providesSupport rdf:resource="#Discord"/>
+    <providesSupport rdf:resource="#SupportStaff24x7"/>
+    <rdfs:comment>Stripe offers support through Discord and 24×7 staff.</rdfs:comment>
+  </owl:NamedIndividual>
+
+</rdf:RDF>
