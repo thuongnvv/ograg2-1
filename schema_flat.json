@@ -1,0 +1,49 @@
+{
+  "classes": [
+    {
+      "id": "FAQ_WhatIsStripe",
+      "label": "What is Stripe?"
+    },
+    {
+      "id": "FAQ_UnrecognizedCharge",
+      "label": "What should I do if I don't recognize a charge fro..."
+    },
+    {
+      "id": "FAQ_OneDollarCharge",
+      "label": "Why is there a $1 charge on my bank statement?"
+    },
+    {
+      "id": "FAQ_BusinessProcessingIssues",
+      "label": "What should I do if the business is having issues ..."
+    },
+    {
+      "id": "FAQ_GetRefund",
+      "label": "How do I get a refund?"
+    },
+    {
+      "id": "FAQ_CancelSubscription",
+      "label": "How do I cancel subscriptions from a business usin..."
+    },
+    {
+      "id": "FAQ_IssueWithPurchase",
+      "label": "What should I do if I have an issue with a purchas..."
+    },
+    {
+      "id": "FAQ_UnrecognizedChargeNoResponse",
+      "label": "I don't recognize a charge and I've tried to get i..."
+    },
+    {
+      "id": "FAQ_VictimOfFraud",
+      "label": "I was a victim of fraud. What should I do?"
+    },
+    {
+      "id": "FAQ_DisputedPayment",
+      "label": "I disputed a payment. When will I get my money bac..."
+    }
+  ],
+  "object_properties": [],
+  "datatype_properties": [],
+  "named_individuals": [],
+  "class_hierarchy": [],
+  "property_definitions": []
+}

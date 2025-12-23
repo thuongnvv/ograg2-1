@@ -1,0 +1,341 @@
+{
+  "classes": [
+    {
+      "id": "PaymentPlatform",
+      "label": ""
+    },
+    {
+      "id": "Business",
+      "label": ""
+    },
+    {
+      "id": "Customer",
+      "label": ""
+    },
+    {
+      "id": "Charge",
+      "label": ""
+    },
+    {
+      "id": "Authorization",
+      "label": ""
+    },
+    {
+      "id": "Refund",
+      "label": ""
+    },
+    {
+      "id": "Subscription",
+      "label": ""
+    },
+    {
+      "id": "Dispute",
+      "label": ""
+    },
+    {
+      "id": "FraudReport",
+      "label": ""
+    },
+    {
+      "id": "Bank",
+      "label": ""
+    },
+    {
+      "id": "CardIssuer",
+      "label": ""
+    },
+    {
+      "id": "CardNetwork",
+      "label": ""
+    },
+    {
+      "id": "Tool",
+      "label": ""
+    },
+    {
+      "id": "SupportChannel",
+      "label": ""
+    },
+    {
+      "id": "Action",
+      "label": ""
+    },
+    {
+      "id": "Procedure",
+      "label": ""
+    },
+    {
+      "id": "Condition",
+      "label": ""
+    },
+    {
+      "id": "Fact",
+      "label": ""
+    }
+  ],
+  "object_properties": [
+    {
+      "id": "usesPlatform",
+      "domain": "Business",
+      "range": "PaymentPlatform"
+    },
+    {
+      "id": "makesCharge",
+      "domain": "Business",
+      "range": "Charge"
+    },
+    {
+      "id": "receivesCharge",
+      "domain": "Customer",
+      "range": "Charge"
+    },
+    {
+      "id": "linkedTo",
+      "domain": "Charge",
+      "range": "Business"
+    },
+    {
+      "id": "hasAuthorization",
+      "domain": "Charge",
+      "range": "Authorization"
+    },
+    {
+      "id": "initiates",
+      "domain": "Customer",
+      "range": "Action"
+    },
+    {
+      "id": "performs",
+      "domain": "Business",
+      "range": "Action"
+    },
+    {
+      "id": "contacts",
+      "domain": "Customer",
+      "range": "Business"
+    },
+    {
+      "id": "reportsTo",
+      "domain": "Customer",
+      "range": "Bank"
+    },
+    {
+      "id": "filesDispute",
+      "domain": "Customer",
+      "range": "Dispute"
+    },
+    {
+      "id": "debitedFrom",
+      "domain": "Dispute",
+      "range": "PaymentPlatform"
+    },
+    {
+      "id": "decidedBy",
+      "domain": "Refund",
+      "range": "CardIssuer"
+    },
+    {
+      "id": "usesTool",
+      "domain": "Customer",
+      "range": "Tool"
+    },
+    {
+      "id": "providesSupport",
+      "domain": "PaymentPlatform",
+      "range": "SupportChannel"
+    },
+    {
+      "id": "triggers",
+      "domain": "Action",
+      "range": "Procedure"
+    },
+    {
+      "id": "hasStep",
+      "domain": "Procedure",
+      "range": "Action"
+    },
+    {
+      "id": "requiresCondition",
+      "domain": "Action",
+      "range": "Condition"
+    },
+    {
+      "id": "hasCondition",
+      "domain": "Procedure",
+      "range": "Condition"
+    },
+    {
+      "id": "assertsFact",
+      "domain": "Fact",
+      "range": "xsd:string"
+    }
+  ],
+  "datatype_properties": [
+    "name",
+    "description",
+    "amount",
+    "currency",
+    "status",
+    "date",
+    "durationDays",
+    "isTemporary",
+    "timeLimitDays",
+    "appearsOnStatementAs"
+  ],
+  "named_individuals": [
+    {
+      "id": "Stripe",
+      "type": "PaymentPlatform"
+    },
+    {
+      "id": "ChargeLookupTool",
+      "type": "Tool"
+    },
+    {
+      "id": "Discord",
+      "type": "SupportChannel"
+    },
+    {
+      "id": "SupportStaff24x7",
+      "type": "SupportChannel"
+    },
+    {
+      "id": "BusinessUsingStripe",
+      "type": "Business"
+    },
+    {
+      "id": "GenericCustomer",
+      "type": "Customer"
+    },
+    {
+      "id": "GenericBank",
+      "type": "Bank"
+    },
+    {
+      "id": "GenericCardIssuer",
+      "type": "CardIssuer"
+    },
+    {
+      "id": "GenericCardNetwork",
+      "type": "CardNetwork"
+    },
+    {
+      "id": "AuthOneDollar",
+      "type": "Authorization"
+    },
+    {
+      "id": "SampleCharge",
+      "type": "Charge"
+    },
+    {
+      "id": "SampleRefund",
+      "type": "Refund"
+    },
+    {
+      "id": "SampleDispute",
+      "type": "Dispute"
+    },
+    {
+      "id": "SampleFraudReport",
+      "type": "FraudReport"
+    },
+    {
+      "id": "SampleSubscription",
+      "type": "Subscription"
+    },
+    {
+      "id": "RequestRefund",
+      "type": "Action"
+    },
+    {
+      "id": "CancelSubscription",
+      "type": "Action"
+    },
+    {
+      "id": "InitiateDispute",
+      "type": "Action"
+    },
+    {
+      "id": "ReportFraud",
+      "type": "Action"
+    },
+    {
+      "id": "ContactBusiness",
+      "type": "Action"
+    },
+    {
+      "id": "RefundProcedure",
+      "type": "Procedure"
+    },
+    {
+      "id": "CancelSubscriptionProcedure",
+      "type": "Procedure"
+    },
+    {
+      "id": "DisputeProcedure",
+      "type": "Procedure"
+    },
+    {
+      "id": "FraudProcedure",
+      "type": "Procedure"
+    },
+    {
+      "id": "ContactBusinessProcedure",
+      "type": "Procedure"
+    },
+    {
+      "id": "IssueRefund",
+      "type": "Action"
+    },
+    {
+      "id": "ConfirmCancellation",
+      "type": "Action"
+    },
+    {
+      "id": "ReviewDispute",
+      "type": "Action"
+    },
+    {
+      "id": "InvestigateFraud",
+      "type": "Action"
+    },
+    {
+      "id": "EscalateToBank",
+      "type": "Action"
+    },
+    {
+      "id": "RefundTimeLimit",
+      "type": "Condition"
+    },
+    {
+      "id": "CancellationPolicy",
+      "type": "Condition"
+    },
+    {
+      "id": "DisputeTimeWindow",
+      "type": "Condition"
+    },
+    {
+      "id": "FraudInvestigationPolicy",
+      "type": "Condition"
+    },
+    {
+      "id": "ResponseTimePolicy",
+      "type": "Condition"
+    },
+    {
+      "id": "FactStripeCannotRefund",
+      "type": "Fact"
+    },
+    {
+      "id": "FactStripeCannotCancelSubscription",
+      "type": "Fact"
+    },
+    {
+      "id": "StripeSupportLinks",
+      "type": "PaymentPlatform"
+    }
+  ],
+  "class_hierarchy": [],
+  "property_definitions": []
+}
