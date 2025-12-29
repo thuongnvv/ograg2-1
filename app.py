@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import sys
+import json
 import time
 import threading
 import yaml
@@ -283,6 +284,10 @@ def generate_ontology_page():
                         domain=domain or "general"
                     )
                     
+                    # Store schema if available (for structured mode)
+                    if hasattr(generator, 'last_discovered_schema'):
+                        generated_result['discovered_schema'] = generator.last_discovered_schema
+                    
                     # Store in session
                     st.session_state.generated_owl = generated_result
                     
@@ -368,6 +373,14 @@ def generate_ontology_page():
                     )
                     
                     owl_file.unlink()  # Clean up temp file
+                    
+                    # Save discovered schema if available
+                    if 'discovered_schema' in result:
+                        onto_info = st.session_state.manager.get_ontology(ontology_id)
+                        schema_file = Path(onto_info['owl_file']).parent / "schema_discovered.json"
+                        with open(schema_file, 'w', encoding='utf-8') as f:
+                            json.dump(result['discovered_schema'], f, indent=2, ensure_ascii=False)
+                        print(f"   ✓ Schema saved to {schema_file}")
                     
                     st.session_state.current_ontology_id = ontology_id
                     st.session_state.generated_owl = None  # Clear generated

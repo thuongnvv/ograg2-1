@@ -235,6 +235,8 @@ class OntologyGenerator:
         schema_prompt = self._get_schema_discovery_prompt(text, domain)
         schema_response = self._call_llm(schema_prompt)
         
+        schema = None
+        schema_raw = schema_response
         try:
             # Extract JSON from response
             if "```json" in schema_response:
@@ -254,7 +256,12 @@ class OntologyGenerator:
         # Step 2: Ontology Generation
         print("   🏗️  Step 2: Building Ontology based on Schema...")
         generation_prompt = self._get_ontology_generation_prompt(text, domain, schema)
-        return self._call_llm(generation_prompt, is_xml=True)
+        owl_content = self._call_llm(generation_prompt, is_xml=True)
+        
+        # Store schema for later access
+        self.last_discovered_schema = schema if isinstance(schema, dict) else {"raw": schema_raw}
+        
+        return owl_content
 
     def _call_llm(self, prompt: str, is_xml: bool = False) -> str:
         """Helper to call LLM and handle basic cleanup"""
@@ -415,14 +422,21 @@ Design a schema that can capture the answers to these questions.
 Your schema MUST cover:
 1. **CONCEPTS (Nouns)**: The things/entities involved.
 2. **ACTIONS/TASKS (Verbs)**: What can be done? (Crucial for DSL mapping later).
-   - e.g., "Cancel Subscription", "Refund Charge".
 3. **PROCEDURES (Workflows)**: Steps to complete a task.
-4. **RULES/CONDITIONS**: When is an action allowed? (e.g., "within 60 days").
+4. **RULES/CONDITIONS**: When is an action allowed? 
 5. **QUANTITATIVE DATA**: Any numbers, prices, durations, deadlines.
-   - Define specific attributes for these (e.g., hasDuration, hasCost).
 6. **KEY FACTS / ASSERTIONS**: Important statements/rules that don't fit into simple structures.
-   - e.g., "Issuer decides refund timing", "Stripe cannot refund directly".
-   - Model these as instances of a 'Fact' or 'Assertion' class.
+7. **NEGATIVE FACTS** (CRITICAL for preventing hallucinations):
+   - Explicitly capture what the entity does NOT do, cannot do, or never does.
+   - Examples: "Does NOT collect user data", "Cannot provide legal advice", "Never charges fees".
+   - These prevent the AI from making false assumptions.
+8. **DISTINCTION OF SIMILAR CONCEPTS** (CRITICAL for accuracy):
+   - If two concepts seem similar but have different rules, create separate classes.
+9. **FOUNDATIONAL/DEPENDENCY RELATIONSHIPS** (CRITICAL for philosophical questions):
+   - Capture explicit dependencies: "depends on", "requires", "built on top of".
+   - Capture stance/position: "supports", "opposes", "against", "in favor of".
+   - Model these as relationships (dependsOn, supports) or as Assertion individuals.
+
 
 Output a JSON object with the schema design.
 
@@ -471,15 +485,23 @@ INSTRUCTIONS:
 5. POPULATE the ontology with specific INSTANCES (owl:NamedIndividual) extracted from the text
    - Extract ALL specific values, tools, entities mentioned
    - Link them using the defined properties
+6. **CAPTURE NEGATIVE FACTS**: Create individuals/assertions for things that are explicitly stated as NOT happening
+   - Example: If text says "We do NOT track users", create an Assertion individual for this
+   - This prevents hallucinations where AI fills gaps with assumptions
 
-CRITICAL REQUIREMENT:
-Every <owl:Class> and <owl:NamedIndividual> MUST have an <rdfs:comment> 
-containing a natural language description. This is essential for search.
+CRITICAL REQUIREMENTS FOR DESCRIPTIONS:
+Every <owl:Class> and <owl:NamedIndividual> MUST have a RICH <rdfs:comment>.
 
-Example:
-<owl:NamedIndividual rdf:about="#Stripe">
-  <rdfs:comment>A technology company that builds economic infrastructure for the internet.</rdfs:comment>
-  ...
+DESCRIPTION MUST:
+1. Include purpose, use cases, and context
+2. Add synonyms/alternative terms users might search
+3. Specify when/why someone would use this
+4. Avoid generic one-liners
+5. **For similar concepts, explicitly state the DIFFERENCE**
+
+GOOD Example (Rich):
+<owl:NamedIndividual rdf:about="#Action_EditArticle">
+  <rdfs:comment>Edit an article to fix errors, correct mistakes, improve content, update outdated information, or add missing details. This allows users to modify articles when discovering inaccuracies.</rdfs:comment>
 </owl:NamedIndividual>
 
 ═══════════════════════════════════════════════════════════════════
