@@ -1,0 +1,145 @@
+Q1: What is Stripe?
+--------------------------------------------------------------------------------
+ANSWER:
+Stripe is a globally used **PaymentPlatform** that enables businesses to accept online card payments, manage subscriptions, and handle payouts. It provides APIs, dashboards, and tools such as the Charge Lookup Tool. Synonyms include Stripe.com and Stripe PSP【1】.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q2: What should I do if I don't recognize a charge from Stripe?
+--------------------------------------------------------------------------------
+ANSWER:
+If you see a “STRIPE” charge that you cannot identify, follow the **unrecognized‑charge workflow**:
+
+1. **Confirm the unknown‑charge condition** – the situation matches **Condition_UnknownCharge** ([2]), which triggers the lookup process.  
+2. **Use Stripe’s Charge Lookup Tool** – perform **Action_UseChargeLookupTool** ([4]) to enter the last‑4 digits, date and amount; the tool (INST:ChargeLookupTool_Stripe) will reveal the Business behind the charge ([1]). This step is allowed by **Rule_UseLookupWhenUnknownCharge** ([18]).  
+3. **Contact the Business** – after the merchant is identified, reach out to the Business (the step is part of **Procedure_UnrecognizedCharge** ([3])).  
+4. **If the Business does not respond**, proceed to **ContactBank** (the third step of **Procedure_UnrecognizedCharge** ([3])). The bank can then file a dispute or take further action.
+
+The whole process is defined in **Procedure_UnrecognizedCharge** ([3]) and is expected to be completed within **up to 7 days** (duration property of the procedure).
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q3: Why is there a $1 charge on my bank statement? 
+--------------------------------------------------------------------------------
+ANSWER:
+The $1 amount you see is a **temporary $1 authorization** that the payment platform places on your card to verify that the card is valid and has available funds.  
+
+* It is represented by **INST:Charge_OneDollarAuth** – a Charge of $1 USD that is linked to **Authorization_OneDollar** ([2]).  
+* The underlying mechanism is an **Authorization** (a temporary hold) of $1 USD ([11], [17]).  
+
+These $1 holds are automatically removed after a short period, so the charge should disappear from your statement once the authorization expires.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q4: What should I do if the business is having issues processing my payment?
+--------------------------------------------------------------------------------
+ANSWER:
+1. **Contact the Business** – Reach out directly to the merchant (e.g., by email, phone, or support portal) [INST:Action_ContactBusiness] via the customer‑to‑business relationship [PROP:contacts].
+
+2. **Ask for a refund** – Request that the Business issue a refund for the payment that could not be processed [INST:Action_RequestRefundFromBusiness] [PROP:issues].
+
+3. **If the Business does not respond** – When the Business is unresponsive (i.e., fails to reply within the expected timeframe) the condition [INST:Condition_BusinessUnresponsive] becomes true.
+
+4. **Escalate to your Bank** – Contact your issuing Bank to file a dispute or seek further assistance [INST:Action_ContactBank] [PROP:contactsBank].
+
+These steps follow the refund workflow [INST:Procedure_Refund] which includes the actions above and a typical duration of 5‑10 business days for a refund.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q5: How do I get a refund?
+--------------------------------------------------------------------------------
+ANSWER:
+To obtain a refund you should follow the **Refund Procedure** [2]:
+
+1. **Contact the Business** (​Action_ContactBusiness) – let them know you want the money back.  
+2. **Request the refund from the Business** (​Action_RequestRefundFromBusiness) [5].  
+3. If the Business does not respond, **contact your Bank** (​Action_ContactBank) [2].
+
+The refund will be **issued by the Business**, not by the payment platform [1][4], and the whole process typically takes **5‑10 business days** [2].
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q6: How do I cancel subscriptions from a business using Stripe?
+--------------------------------------------------------------------------------
+ANSWER:
+To cancel a subscription you cannot do it through Stripe itself.  
+
+* Stripe has the negative fact **NegativeFact_CannotCancelSubscriptions** ([1]), meaning the platform does not have the ability to cancel subscriptions on a Business’s behalf.  
+* Cancellation must be performed by the **Business** that owns the subscription (the Business can cancel a Subscription via the property **cancels** ([2])).  
+* Therefore you should **contact the Business directly** (Action_ContactBusiness, [16]) and ask them to cancel the subscription for you.  
+
+So the steps are: use Action_ContactBusiness to reach the Business, and the Business will apply its cancels property to end the Subscription. The provided terms do not describe any Stripe‑based cancellation mechanism.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q7: What should I do if I have an issue with a purchase I made?
+--------------------------------------------------------------------------------
+ANSWER:
+1. **Contact the Business** – Use the Customer’s PROP:contacts relationship to reach out directly (e.g., email, phone, support portal) [10]. This is modeled by **INST:Action_ContactBusiness** [3].
+
+2. **Request a Refund** – Ask the Business to issue a Refund for the purchase [13] via **INST:Action_RequestRefundFromBusiness** [16].
+
+3. **If the Business does not respond** (i.e., **INST:Condition_BusinessUnresponsive** evaluates true) [9], **escalate to the Bank**:  
+   - Contact your issuing Bank [12] through **INST:Action_ContactBank** [11].  
+   - If needed, have the Bank **file a dispute** with the Card Issuer using **INST:Action_FileDispute** [8] (creates a **Dispute** [1]).
+
+These steps follow the standard refund‑and‑dispute workflow defined in the ontology.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q8: I don't recognize a charge and I've tried to get in touch with the business. How can I get my money back?
+--------------------------------------------------------------------------------
+ANSWER:
+To recover the money for an unknown “STRIPE” charge after you have already tried to reach the Business, follow the next steps defined in the ontology:
+
+1. **Contact your issuing Bank** – use the action **Action_ContactBank** ([17]) which is part of the **Procedure_UnrecognizedCharge** ([1]) and the **Procedure_Refund** ([10]).  
+2. When you contact the Bank, **file a formal dispute** with the Card Issuer by performing **Action_FileDispute** ([7]). This initiates a charge‑back process that can return the funds to you.  
+
+These steps are triggered when the **Condition_UnknownCharge** ([5]) is true and the Business is unresponsive, as specified in the **Procedure_UnrecognizedCharge** ([1]) workflow.  
+
+So, after the Business does not respond, **contact your Bank and file a dispute** to get the money back.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q9: I was a victim of fraud. What should I do?
+--------------------------------------------------------------------------------
+ANSWER:
+If you suspect a **FraudCase** [1], follow the **fraud‑reporting procedure** [2]:
+
+1. **Contact your Bank** [4] (the Customer → Bank relationship) by performing **Action_ContactBank** [5].  
+2. **Report the fraud** to the Bank with **Action_ReportFraud** [3] (immediate notification).  
+3. If needed, have the Bank **file a dispute** using **Action_FileDispute** [8] (formal charge‑back request).
+
+These steps constitute the complete **Procedure_FraudReport** [2] for handling a fraudulent charge.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q10: I disputed a payment. When will I get my money back?
+--------------------------------------------------------------------------------
+ANSWER:
+A **Dispute** (Term [1]) is a formal challenge raised by the Customer’s Card Issuer against a Charge. The issuer decides whether the funds are returned to the Customer, but the provided ontology does not specify a time‑frame for that return.
+
+The only timing information related to the dispute process is the duration for filing the dispute (**Action_FileDispute**, Term [4]), which can take “up to 30 days,” and the duration for contacting the Bank (**Action_ContactBank**, Term [16]), which can take “up to 7 days for resolution.” Neither of these terms defines when the disputed amount will actually be credited back to the Customer.
+
+Facts Retrieved: 20
+
+================================================================================
+

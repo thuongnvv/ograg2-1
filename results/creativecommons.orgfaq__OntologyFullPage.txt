@@ -1,0 +1,101 @@
+================================================================================
+WIKIPEDIA FAQ - MANUAL REVIEW RESULTS
+================================================================================
+
+Q1: What is Creative Commons and what do you do?
+--------------------------------------------------------------------------------
+ANSWER:
+Creative Commons is the global nonprofit **Organization** that provides free legal tools (licenses, CC0, Public Domain Mark) to enable sharing and reuse of creative works【3】.  The central entity behind these tools is **INST:CreativeCommonsOrg**, whose properties describe it as “Creative Commons” with the purpose of offering those tools【1】.
+
+What Creative Commons does:
+
+* Publishes and maintains the six core **CCLicense** family of licenses (e.g., BY, BY‑NC, BY‑SA, etc.)【4】.  
+* Makes the licenses and related tools publicly available via its website (https://creativecommons.org)【1】.  
+* Does **not** give legal advice, track licensed material, or provide referral services (NegativeFact_NoLegalAdvice【10】, NegativeFact_NoTracking【13】, NegativeFact_NoReferral implied).  
+
+Thus, Creative Commons creates and distributes standardized licensing tools, but it does not act as a law firm, a tracking database, or a referral service.
+
+Facts Retrieved: 23
+
+================================================================================
+
+Q2: Is Creative Commons against copyright?
+--------------------------------------------------------------------------------
+ANSWER:
+The provided terms don’t contain information about whether Creative Commons is “against copyright.” [1] (only describes Creative Commons as an organization that provides free legal tools to enable sharing and reuse of creative works).
+
+Facts Retrieved: 22
+
+================================================================================
+
+Q3: What does “Some Rights Reserved” mean?
+--------------------------------------------------------------------------------
+ANSWER:
+“Some Rights Reserved” describes the situation in which a **RightsHolder** (​[1]​) retains a portion of the rights they hold in a **CreativeWork** (​[23]​) and releases only the remaining portion through a **License** (​[5]​).  
+
+The License specifies the permissions it **allows** (​[10]​) and the uses it **prohibits** (​[17]​) (or otherwise marks as not granted via **hasNegativeFact_License** (​[2]​)).  Rights that are
+
+Facts Retrieved: 23
+
+================================================================================
+
+Q4: Can Creative Commons give legal advice about its licenses or other tools, or help with CC license enforcement?
+--------------------------------------------------------------------------------
+ANSWER:
+No. Creative Commons does **not** provide legal advice about its licenses or other tools, nor does it help with CC‑license enforcement. This is stated in the negative fact INST:NegativeFact_NoLegalAdvice ([2]) and reflected in the organization’s properties isLegalAdviceProvider = false and the associated negative fact ([3]).
+
+Facts Retrieved: 22
+
+================================================================================
+
+Q5: Does Creative Commons collect or track material licensed under a CC license?
+--------------------------------------------------------------------------------
+ANSWER:
+No. Creative Commons does **not** collect or track material that is licensed under a CC license. This is stated in the negative fact **INST:NegativeFact_NoTracking** (described as “Creative Commons does NOT collect or track material licensed under a CC license”) [3] and is linked to the organization **INST:CreativeCommonsOrg** via its hasNegativeFact property [5].
+
+Facts Retrieved: 23
+
+================================================================================
+
+Q6: What do the Creative Commons buttons do?
+--------------------------------------------------------------------------------
+ANSWER:
+The provided terms don't contain information about Creative Commons buttons.
+
+Facts Retrieved: 23
+
+================================================================================
+
+Q7: May I use the Creative Commons logo and buttons?
+--------------------------------------------------------------------------------
+ANSWER:
+The provided terms don’t contain information about using the Creative Commons logo or buttons. (No term in the list addresses logo or button usage.)
+
+Facts Retrieved: 23
+
+================================================================================
+
+Q8: I love Creative Commons. How can I help?
+--------------------------------------------------------------------------------
+ANSWER:
+You can support Creative Commons by making a monetary contribution — a **DonateAction** ([2]) such as the example **INST:Action_Donate** ([4]) that “Donate to Creative Commons.” The donation is given to the organization **Creative Commons** ([1] / [3]), which does not provide legal advice, track licensed material, or charge fees.  
+
+So, to help, simply perform a **DonateAction** (e.g., give $10 USD as shown in [4]) to **Creative Commons** ([1]).
+
+Facts Retrieved: 23
+
+================================================================================
+
+Q9: Why does Creative Commons run an annual fundraising campaign? What is the money used for and where does it go?
+--------------------------------------------------------------------------------
+ANSWER:
+Creative Commons runs an annual fundraising campaign to obtain **donations** that support its nonprofit **mission** of providing free legal tools (licenses, CC0, Public Domain Mark) that enable sharing and reuse of creative works【1†L1-L3】【3†L1-L3】.  
+
+When a person performs a **DonateAction** (e.g., INST:Action_Donate) the money is given to the central organization **Creative Commons Org** (INST:CreativeCommonsOrg)【2†L1-L4】【5†L1-L4】. Because Creative Commons is a nonprofit that **does not charge fees**【4†L1-L2】 and does not collect data【8†L1-L2】, the donated funds are used to sustain its operations, develop and maintain its legal tools, and carry out its outreach and educational activities.  
+
+The provided terms do not specify more detailed line‑item allocations; they only indicate that the money goes to the Creative Commons organization to support its overall mission.
+
+Facts Retrieved: 22
+
+================================================================================
+

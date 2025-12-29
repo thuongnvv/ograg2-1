@@ -1,0 +1,217 @@
+
+Q1: What is Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+Wikipedia is a free online encyclopedia platform that hosts millions of articles in many languages (Term [1]). The concrete instance of this platform is **INST:WikipediaInstance**, described as “the central Wikipedia platform, a free multilingual encyclopedia that anyone can read and edit” (Term [2]). It is free to use, edit, and reproduce under open licenses (Fact [3]).
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q2: Who writes Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+Wikipedia is authored by **VolunteerEditors**—the community of unpaid users who create and edit articles [3]. This worldwide **VolunteerEditor Community** is the group responsible for writing Wikipedia content [5].
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q3: How do I access Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+To reach Wikipedia you need a **User** who accesses it **via** a software **Platform** ([3] PROP:accessedVia, domain User, range Platform) ([5] Platform).  
+
+Typical platforms are:  
+
+* **Web Browser** – the standard web platform used on computers or other devices ([14] INST:Platform_Web).  
+* **Wikipedia Mobile App** – the official mobile‑app platform for iOS and Android ([17] INST:Platform_MobileApp).  
+
+These platforms run on a **Device** such as a personal computer ([7] Device, [9] INST:Device_Computer) or a smartphone.  
+
+Wikipedia itself is free to use and edit ([6] INST:Fact_WikipediaFree).  
+
+If a government blocks access, you can reach Wikipedia through a **VPNService** ([13] VPNService).
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q4: Is Wikipedia censored?
+--------------------------------------------------------------------------------
+ANSWER:
+Wikipedia itself is **not censored** — the ontology states that “Wikipedia itself is NOT censored; only external governments may block it” (INST:NegativeFact_WikipediaNotCensored [1]).  
+
+However, governments can **block access** to Wikipedia, which is why a VPN service may be needed (INST:Fact_WikipediaMayBeBlocked [3]).
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q5: How do I search Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+To search Wikipedia you follow the **Search Procedure** [INST:Procedure_Search]:
+
+1. **Access Wikipedia** through a software **Platform** [PROP:accessedVia] (e.g., a web browser).  
+2. Locate the **Search Box** UI element at the top‑right of the page [SearchBox] [INST:SearchBox_Instance].  
+3. Type the desired query into the box.  
+4. Initiate the **Search Action** [INST:Action_Search], which performs the search instantly [Action].
+
+These steps constitute the ordered process for searching Wikipedia.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q6: How do I do research with Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+To research with Wikipedia you can follow this simple workflow, using only the concepts defined in the ontology:
+
+1. **Choose a Device and Platform** – Use a hardware **Device** such as a computer (INST:Device_Computer [13]) or any other device, and a software **Platform** (e.g., web browser) to reach the Wikipedia instance (INST:WikipediaInstance [2]) via the property **PROP:accessedVia** [5].
+
+2. **Open Wikipedia** – Navigate to the central Wikipedia site (url https://en.wikipedia.org/ [2]).
+
+3. **Search for a topic**  
+   a. Locate the **Search Box** (INST:SearchBox_Instance [19]).  
+   b. Trigger the **Search Action** (INST:Action_Search [18]), which is instantaneous.  
+   c. This follows the **Search Procedure** (INST:Procedure_Search [8]) that models the ordered steps a user takes.
+
+4. **Read the resulting Articles** – The Wikipedia instance **provides** (PROP:provides [14]) many **Article** entities (Article [9]) that contain the information you need.
+
+5. **Cite the information** – When you want to reference an article, use the built‑in **Citation Tool** (INST:CitationTool [10]) to generate a properly formatted reference (Citation [4]).
+
+6. **Respect the License** – All content is governed by a **License** (License [12]) that allows free reuse under open terms (Fact_WikipediaFree [11]).
+
+7. **Optional: Contribute** – If you find gaps, you can edit or add content through the **Volunteer Editor Community** (INST:VolunteerEditor_Community [15]).
+
+These steps let you conduct research, retrieve information, and cite Wikipedia while staying within the defined ontology.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q7: What is the license agreement on the contents of Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+The contents of Wikipedia are made available under open licenses — specifically the GNU Free Documentation License (GFDL) (INST:GFDL_License) and the Creative Commons Attribution‑ShareAlike 4.0 International license (INST:CC_BY_SA_4_0) 【5】【14】. This is reflected in the statement that Wikipedia is free to use, edit and reproduce under open licenses (INST:Fact_WikipediaFree)【2】.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q8: May I mirror entire sections of the Wikipedia to my site? How much may I quote?
+--------------------------------------------------------------------------------
+ANSWER:
+You can create a site that replicates Wikipedia content – this is modeled by the **MirrorSite** class ([2]) and the property **PROP:mirrors** that links a MirrorSite to Wikipedia ([1]). An example is the unofficial mirror instance **INST:MirrorSite_Unofficial** ([3]), which “replicates Wikipedia content; may contain ads or altered material.”
+
+Any mirroring must obey the **License** governing Wikipedia reuse ([4]), which includes the open licenses (e.g., CC‑BY‑SA 4.0, GFDL) mentioned in the ontology. The fact that Wikipedia “is free to use, edit, and reproduce under open licenses” is captured by **INST:Fact_WikipediaFree** ([10]).
+
+The ontology does **not** contain information about how much of a Wikipedia article may be quoted or any specific quoting limits.  
+
+**Answer:**  
+- Mirroring entire sections is allowed in principle by creating a MirrorSite, provided you comply with Wikipedia’s open **License**.  
+- The provided terms do not specify a maximum amount you may quote.  
+
+*References: [1], [2], [3], [4], [10].*
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q9: If I link a word from my site to Wikipedia, am I required to use the GNU FDL for my site?
+--------------------------------------------------------------------------------
+ANSWER:
+No. Linking to Wikipedia is **not** regulated by the GNU Free Documentation License, so you are not required to apply the GNU FDL to your own site. 【3】
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q10: What if I use a small quote (three or four sentences)?
+--------------------------------------------------------------------------------
+ANSWER:
+Using a short excerpt still creates a **Citation** (Term 2).  
+The citation must be linked to the specific Wikipedia **Article** with the property **PROP:cites** (Term 1).  
+
+If you (as a **User**) add the quote, you may need to **verify** the citation via **PROP:verifies** (Term 10).  
+
+The **License** that governs the article can **support** that citation through **PROP:supports** (Term 7) or, if it imposes restrictions, may **oppose** the use via **PROP:opposes** (Term 11).  
+
+When the quoting action is part of a workflow, it can be modeled as a **ProcedureStep** (Term 4) that **executes** an **Action** (PROP:executes, Term 5) and may be **triggered**
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q11: What if I quote entire articles?
+--------------------------------------------------------------------------------
+ANSWER:
+Quoting an entire Wikipedia article creates a **Citation** [8] that points to an **Article** [3].  
+The Article is governed by a **License** [5] via **PROP:licensedUnder** [2].  
+That License can **support** [4] the reuse expressed as a citation, so the reuse is permitted as long as the License’s conditions are met (e.g., attribution for CC‑BY‑SA 4.0 [17] or GFDL [16]).  
+
+If you want to confirm the citation, a **User** may **verify** [6] it.  
+
+*Relevant term IDs:* [2], [3], [4], [5], [8], [16], [17].
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q12: Can I get Wikipedia on CD, or download it for offline use?
+--------------------------------------------------------------------------------
+ANSWER:
+The provided terms don’t contain information about obtaining Wikipedia on CD or downloading it for offline use. (The ontology includes facts about Wikipedia being free [INST:Fact_WikipediaFree] and about possible blocking [INST:Fact_WikipediaMayBeBlocked], but no term addresses offline distribution.)
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q13: How do I cite a Wikipedia article in a paper?
+--------------------------------------------------------------------------------
+ANSWER:
+1. Open the Wikipedia **Article** you want to reference ([1]).  
+2. Go to the built‑in **Wikipedia Citation Generator** ([5]) at `https://en.wikipedia.org/wiki/Special:Cite`.  
+3. Choose the required **citation style** ([20]) (e.g., APA, MLA).  
+4. The tool creates a **Citation** ([2]) that **cites** the selected **Article** via the property **PROP:cites** ([3]).  
+5. Copy the formatted reference and insert it into your paper.  
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q14: What should I do when I find an error in Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+When you notice an error, you can correct it yourself by editing the **Article** ([14]) through the **Platform** ([6]) you are using to access **WikipediaInstance** ([3]). If you prefer, you may also notify or collaborate with the **Wikipedia Volunteer Editors Community** ([15]), who are responsible for authoring and editing articles.
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q15: Why do I see advertisements in Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+Wikipedia itself does **not** display advertisements on its pages (INST:NegativeFact_NoAds [1]; INST:WikipediaInstance hasAds false [6]). If you are seeing ads, you are likely accessing a **mirror site** that replicates Wikipedia content and may include advertisements (MirrorSite [2]; PROP:mirrors [17]; INST:MirrorSite_Unofficial [20]).
+
+Facts Retrieved: 20
+
+================================================================================
+
+Q16: Where can I get more information about using Wikipedia?
+--------------------------------------------------------------------------------
+ANSWER:
+You can find detailed information about using Wikipedia on the central Wikipedia platform itself [2] (https://en.wikipedia.org/).  The site includes help pages, editing guides, and a built‑in citation generator [18] that explains how to create references.  You can reach Wikipedia through a standard web browser [15] (the “Web” platform) [3] or any other software platform that accesses Wikipedia [4].  
+
+**Key resources**  
+- Wikipedia main site [2] – the primary source of facts and usage instructions.  
+- Wikipedia Citation Generator [18] – tool for creating citations and learning citation formats.  
+
+If you need further assistance, consult the help and FAQ sections available on the Wikipedia site.
+
+Facts Retrieved: 20
+
+================================================================================
+
