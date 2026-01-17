@@ -1,0 +1,47 @@
+{
+  "overall": {
+    "faithfulness": {
+      "mean": NaN,
+      "std": NaN
+    },
+    "correctness": {
+      "mean": NaN,
+      "std": NaN
+    },
+    "completeness": {
+      "mean": NaN,
+      "std": NaN
+    }
+  },
+  "by_category": {
+    "About CC": {
+      "correctness_mean": 0
+    },
+    "General License Information": {
+      "correctness_mean": 0
+    },
+    "For Licensors": {
+      "correctness_mean": 0
+    },
+    "For Licensees": {
+      "correctness_mean": 0
+    },
+    "Data": {
+      "correctness_mean": 0
+    },
+    "Artificial intelligence and CC\nlicenses": {
+      "correctness_mean": 0
+    }
+  },
+  "by_difficulty": {
+    "hard": {
+      "correctness_mean": 0
+    },
+    "medium": {
+      "correctness_mean": 0
+    },
+    "easy": {
+      "correctness_mean": 0
+    }
+  }
+}

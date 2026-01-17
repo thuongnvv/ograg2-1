@@ -134,7 +134,67 @@ class GenericQueryEngine:
             # Fallback to zero vector
             return np.zeros(768)
     
-    def retrieve(self, query: str, top_k: int = 5, expand_hierarchy: bool = True) -> List[Dict[str, Any]]:
+    def _expand_query(self, query: str) -> str:
+        """
+        Expand query with synonyms and related terms using LLM.
+        
+        Args:
+            query: Original user query
+            
+        Returns:
+            Expanded query string with additional terms
+        """
+        if not self.llm_client:
+            return query  # No expansion if no LLM
+        
+        expansion_prompt = f"""Your task is to expand the following search query with relevant synonyms and related terms to improve search recall.
+
+Query: "{query}"
+
+Generate 3-5 additional terms that are:
+1. Synonyms of key verbs/nouns in the query
+2. Related actions or concepts
+3. Alternative phrasings
+
+Return ONLY a comma-separated list of terms, no other text.
+"""
+        
+        try:
+            response = self.llm_client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that expands search queries with synonyms."},
+                    {"role": "user", "content": expansion_prompt}
+                ],
+                temperature=0.3,
+                max_tokens=300  # Increased from 100 to avoid truncation
+            )
+            
+            # Debug logging
+            print(f"  LLM Response Object: {response}")
+            print(f"  Choices: {response.choices}")
+            
+            if not response.choices:
+                print("  ERROR: LLM returned no choices")
+                return query
+            
+            content = response.choices[0].message.content
+            print(f"  Content: {content}")
+            
+            if content is None:
+                print("  ERROR: LLM content is None")
+                return query
+                
+            expanded_terms = content.strip()
+            # Combine original + expanded
+            return f"{query} {expanded_terms}"
+        except Exception as e:
+            print(f"  ERROR in query expansion: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
+            return query
+    
+    def retrieve(self, query: str, top_k: int = 5, expand_hierarchy: bool = True, expand_query: bool = False) -> List[Dict[str, Any]]:
         """
         Retrieve relevant facts with Smart Context
         
@@ -151,6 +211,13 @@ class GenericQueryEngine:
         Returns:
             List of retrieved facts (merged by term) with scores
         """
+        # Apply query expansion if enabled
+        if expand_query:
+            expanded_query = self._expand_query(query)
+            if expanded_query != query:
+                print(f"  Query expanded: '{query}' → '{expanded_query}'")
+            query = expanded_query
+        
         # Encode query using Ollama (100% local)
         query_embedding = self._get_embedding(query)
         
@@ -163,6 +230,21 @@ class GenericQueryEngine:
         
         # Combined score (max of key and value)
         combined_scores = np.maximum(key_scores, value_scores)
+        
+        # Adaptive Query Expansion: If top scores are low, try expanding
+        max_score = np.max(combined_scores)
+        if not expand_query and max_score < 0.65:  # Low confidence threshold
+            print(f"  Low semantic match (max score: {max_score:.3f}), trying query expansion...")
+            expanded_query = self._expand_query(query)
+            if expanded_query != query:
+                print(f"  Query expanded: '{query}' → '{expanded_query}'")
+                # Re-embed with expanded query
+                query_embedding = self._get_embedding(expanded_query)
+                query_embedding = query_embedding / (np.linalg.norm(query_embedding) + 1e-8)
+                key_scores = np.dot(self.key_embeddings, query_embedding)
+                value_scores = np.dot(self.value_embeddings, query_embedding)
+                combined_scores = np.maximum(key_scores, value_scores)
+        
         
         # Group by fact (chunk)
         fact_scores = {}
@@ -221,45 +303,49 @@ class GenericQueryEngine:
                 'term_id': term_data['term_id']
             })
         
-        # Smart Context: Add parent terms if requested (up to 2 parents per main term)
+        # Smart Context: Add related terms via ALL relationships (not just is_a)
         if expand_hierarchy and results:
-            parent_results = []
+            related_results = []
             seen_term_ids = {r['term_id'] for r in results}  # Track existing terms
             
             for result in results:
                 raw_term = result['fact']['_raw_term']
                 rels = raw_term.get('relationships', {})
                 
-                if 'is_a' in rels:
-                    parents = rels['is_a'] if isinstance(rels['is_a'], list) else [rels['is_a']]
+                # Iterate through ALL relationship types
+                for rel_type, related_ids in rels.items():
+                    # Handle both single value and list
+                    if not isinstance(related_ids, list):
+                        related_ids = [related_ids]
                     
-                    # Add up to 2 parents for this specific term
-                    term_parents_added = 0
-                    for parent_id in parents:
-                        if term_parents_added >= 2:
+                    # Add up to 2 related terms per relationship type
+                    type_added = 0
+                    for related_id in related_ids:
+                        if type_added >= 2:
                             break
                         
-                        # Skip if already retrieved or added
-                        if parent_id in seen_term_ids:
+                        # Skip if already retrieved
+                        if related_id in seen_term_ids:
                             continue
                             
-                        # Find parent chunks
+                        # Find related term chunks
                         for fact in self.facts:
                             fact_term_id = fact.get('_term_id', '')
-                            if fact_term_id == parent_id and fact.get('_chunk_type') == 'core':
-                                parent_results.append({
+                            if fact_term_id == related_id and fact.get('_chunk_type') == 'core':
+                                related_results.append({
                                     'fact': fact,
                                     'score': 0.5,  # Lower score for context
                                     'term_id': fact_term_id,
-                                    '_is_parent': True,
-                                    '_parent_of': result['term_id']
+                                    '_is_related': True,
+                                    '_related_via': rel_type,
+                                    '_related_to': result['term_id']
                                 })
                                 seen_term_ids.add(fact_term_id)
-                                term_parents_added += 1
+                                type_added += 1
                                 break
             
-            # Add unique parent terms
-            results.extend(parent_results)
+            # Add unique related terms
+            results.extend(related_results)
         
         # IMPORTANT: Re-sort by relevance score after adding parent terms
         results = sorted(results, key=lambda x: x['score'], reverse=True)

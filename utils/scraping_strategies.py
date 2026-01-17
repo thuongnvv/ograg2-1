@@ -111,6 +111,14 @@ class JavaScriptStrategy(ScrapingStrategy):
     
     def extract(self, url: str) -> str:
         """Extract from JavaScript-rendered content using Playwright"""
+        import sys
+        
+        # Skip Playwright entirely on Windows (asyncio subprocess issue)
+        if sys.platform == 'win32':
+            print("   ⚠️  Playwright unavailable on Windows, using static HTML...")
+            static_strategy = StaticHTMLStrategy(self.config)
+            return static_strategy.extract(url)
+        
         try:
             from playwright.sync_api import sync_playwright
         except ImportError:
@@ -119,27 +127,34 @@ class JavaScriptStrategy(ScrapingStrategy):
                 "Install with: pip install playwright && playwright install chromium"
             )
         
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            
-            # Set user agent
-            page.set_extra_http_headers({
-                'User-Agent': self.config.user_agent
-            })
-            
-            # Navigate with domcontentloaded wait
-            # (networkidle can hang on analytics scripts)
-            page.goto(url, wait_until="domcontentloaded", timeout=self.config.timeout * 1000)
-            
-            # Wait for dynamic content to render
-            page.wait_for_timeout(self.config.wait_time * 1000)
-            
-            # Get text from body
-            text = page.inner_text("body")
-            browser.close()
-            
-            return text
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page()
+                
+                # Set user agent
+                page.set_extra_http_headers({
+                    'User-Agent': self.config.user_agent
+                })
+                
+                # Navigate with domcontentloaded wait
+                # (networkidle can hang on analytics scripts)
+                page.goto(url, wait_until="domcontentloaded", timeout=self.config.timeout * 1000)
+                
+                # Wait for dynamic content to render
+                page.wait_for_timeout(self.config.wait_time * 1000)
+                
+                # Get text from body
+                text = page.inner_text("body")
+                browser.close()
+                
+                return text
+                
+        except NotImplementedError:
+            # Windows asyncio subprocess issue - fallback to static HTML
+            print("   ⚠️  Playwright unavailable (Windows asyncio issue), falling back to static HTML...")
+            static_strategy = StaticHTMLStrategy(self.config)
+            return static_strategy.extract(url)
 
 
 class HybridStrategy(ScrapingStrategy):
@@ -230,46 +245,61 @@ class StealthStrategy(ScrapingStrategy):
         Note: This is a basic implementation. For heavy protection,
         consider using specialized tools like playwright-stealth or undetected-chromedriver
         """
+        import sys
+        
+        # Skip Playwright entirely on Windows (asyncio subprocess issue)
+        if sys.platform == 'win32':
+            print("   ⚠️  Playwright unavailable on Windows, using static HTML...")
+            static_strategy = StaticHTMLStrategy(self.config)
+            return static_strategy.extract(url)
+        
         try:
             from playwright.sync_api import sync_playwright
         except ImportError:
             raise ImportError("Playwright required for stealth strategy")
         
-        with sync_playwright() as p:
-            # Use more stealthy browser context
-            browser = p.chromium.launch(
-                headless=True,
-                args=['--disable-blink-features=AutomationControlled']
-            )
-            
-            context = browser.new_context(
-                user_agent=self.config.user_agent,
-                viewport={'width': 1920, 'height': 1080},
-                locale='en-US',
-            )
-            
-            page = context.new_page()
-            
-            # Add stealth scripts
-            page.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', {
-                    get: () => undefined
-                });
-            """)
-            
-            # Navigate
-            page.goto(url, wait_until="domcontentloaded", timeout=self.config.timeout * 1000)
-            
-            # Random wait to appear more human-like
-            import random
-            wait_time = random.uniform(2, 4)
-            page.wait_for_timeout(int(wait_time * 1000))
-            
-            # Get content
-            text = page.inner_text("body")
-            browser.close()
-            
-            return text
+        try:
+            with sync_playwright() as p:
+                # Use more stealthy browser context
+                browser = p.chromium.launch(
+                    headless=True,
+                    args=['--disable-blink-features=AutomationControlled']
+                )
+                
+                context = browser.new_context(
+                    user_agent=self.config.user_agent,
+                    viewport={'width': 1920, 'height': 1080},
+                    locale='en-US',
+                )
+                
+                page = context.new_page()
+                
+                # Add stealth scripts
+                page.add_init_script("""
+                    Object.defineProperty(navigator, 'webdriver', {
+                        get: () => undefined
+                    });
+                """)
+                
+                # Navigate
+                page.goto(url, wait_until="domcontentloaded", timeout=self.config.timeout * 1000)
+                
+                # Random wait to appear more human-like
+                import random
+                wait_time = random.uniform(2, 4)
+                page.wait_for_timeout(int(wait_time * 1000))
+                
+                # Get content
+                text = page.inner_text("body")
+                browser.close()
+                
+                return text
+                
+        except NotImplementedError:
+            # Windows asyncio subprocess issue - fallback to static HTML
+            print("   ⚠️  Playwright unavailable (Windows asyncio issue), falling back to static HTML...")
+            static_strategy = StaticHTMLStrategy(self.config)
+            return static_strategy.extract(url)
 
 
 # Strategy factory

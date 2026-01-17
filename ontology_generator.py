@@ -24,6 +24,50 @@ from bs4 import BeautifulSoup
 from openai import OpenAI
 
 
+def chunk_text(text: str, chunk_size: int = 30000, overlap: int = 1000) -> list:
+    """
+    Split large text into overlapping chunks for processing.
+    
+    Args:
+        text: Input text to chunk
+        chunk_size: Maximum characters per chunk (default: 30000)
+        overlap: Characters to overlap between chunks (default: 1000)
+    
+    Returns:
+        List of text chunks
+    """
+    if len(text) <= chunk_size:
+        return [text]
+    
+    chunks = []
+    start = 0
+    
+    while start < len(text):
+        end = start + chunk_size
+        
+        # Try to break at a natural boundary (sentence end, paragraph)
+        if end < len(text):
+            # Look for sentence end (. ? !) within last 500 chars
+            search_start = max(end - 500, start)
+            best_break = end
+            
+            for i in range(end, search_start, -1):
+                if text[i-1] in '.?!\n' and (i >= len(text) or text[i] in ' \n'):
+                    best_break = i
+                    break
+            
+            end = best_break
+        
+        chunk = text[start:end].strip()
+        if chunk:
+            chunks.append(chunk)
+        
+        # Move start with overlap
+        start = end - overlap if end < len(text) else len(text)
+    
+    return chunks
+
+
 class OntologyGenerator:
     """Generate OWL ontology from documents using LLM"""
     
@@ -305,235 +349,203 @@ class OntologyGenerator:
             raise
 
     def _get_flat_prompt(self, text: str, domain: str) -> str:
-        """Get FLAT FAQ prompt (baseline - no hierarchy/relationships)"""
-        return f"""You are an expert Ontology Engineer. Your task is to convert the provided text into a valid OWL ontology in RDF/XML format.
+        """Get FLAT FAQ prompt (no hierarchy/relationships)"""
+        return f"""Convert text to OWL ontology. Create ONE owl:Class per distinct concept/question.
 
-═══════════════════════════════════════════════════════════════════
-DOMAIN CONTEXT: {domain}
-═══════════════════════════════════════════════════════════════════
+DOMAIN: {domain}
 
-INPUT TEXT:
+TEXT:
 {text}
 
-═══════════════════════════════════════════════════════════════════
-YOUR TASK: Analyze the text and extract ALL knowledge into OWL format
-═══════════════════════════════════════════════════════════════════
+RULES:
+1. For Q&A content: One Class per question, label=question, comment=answer
+2. For general content: One Class per concept/entity
+3. Every Class MUST have:
+   - rdfs:label (the term/question)
+   - rdfs:comment (full definition/answer - include ALL details)
+4. ID format: #FAQ_TopicName or #Concept_Name
+5. NO owl:ObjectProperty, NO relationships, NO hierarchy
+6. Capture KEY PHRASES as separate classes with exact text
 
-STEP 1: DETECT CONTENT TYPE (Follow this order - FIRST MATCH WINS)
-
-═══════════════════════════════════════════════════════════════════
-PRIORITY 1: FAQ / Q&A CONTENT DETECTION
-═══════════════════════════════════════════════════════════════════
-DETECTION RULES (if ANY of these are true, treat as FAQ):
-✓ Text contains 3+ questions ending with "?"
-✓ Questions followed by explanatory text (answers)
-✓ Keywords present: "FAQ", "frequently asked", "Q:", "A:"
-✓ Pattern: Question → Answer → Question → Answer
-
-IF FAQ DETECTED:
-CRITICAL: Create ONLY owl:Class elements (NO Properties, NO Individuals)
-- ONE Class per Q&A pair
-- rdfs:label = COMPLETE question text (keep the "?")
-- rdfs:comment = COMPLETE answer text (all details, multiple sentences OK)
-- Use IDs like: #FAQ_WhatIsStripe, #FAQ_HowToRefund
-- DO NOT create owl:ObjectProperty
-- DO NOT create relationships between questions
-
-EXAMPLE (CORRECT FAQ Structure):
-```xml
-<owl:Class rdf:about="#FAQ_WhatIsStripe">
-  <rdfs:label>What is Stripe?</rdfs:label>
-  <rdfs:comment>Stripe is a payment processing platform that allows businesses to accept payments online.</rdfs:comment>
-</owl:Class>
-
-<owl:Class rdf:about="#FAQ_UnrecognizedCharge">
-  <rdfs:label>What should I do if I don't recognize a charge from Stripe?</rdfs:label>
-  <rdfs:comment>Use the charge lookup tool at stripe.com/chargeid to identify which business processed the charge.</rdfs:comment>
-</owl:Class>
-```
-
-WRONG FAQ Examples (DO NOT DO THIS):
-❌ <owl:ObjectProperty rdf:about="#usesChargeLookupTool"> <!-- WRONG! -->
-❌ <owl:NamedIndividual rdf:about="#Question1"> <!-- WRONG! -->
-❌ Creating relationships between questions <!-- WRONG! -->
-❌ Using rdfs:subClassOf between FAQ classes <!-- WRONG! -->
-
-═══════════════════════════════════════════════════════════════════
-CRITICAL XML/OWL REQUIREMENTS:
-═══════════════════════════════════════════════════════════════════
-
-1. STRUCTURE:
-   - Start with: <?xml version="1.0"?>
-   - Root element: <rdf:RDF> with ALL required namespaces
-   - Include <owl:Ontology rdf:about=""/> element
-   - Close all tags properly
-
-2. REQUIRED NAMESPACES (copy exactly):
-   xmlns="http://example.org/ontology#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-   xmlns:owl="http://www.w3.org/2002/07/owl#"
-   xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-
-═══════════════════════════════════════════════════════════════════
-OUTPUT TEMPLATE:
-═══════════════════════════════════════════════════════════════════
-
+TEMPLATE:
 <?xml version="1.0"?>
-<rdf:RDF
-    xmlns="http://example.org/ontology#"
+<rdf:RDF xmlns="http://example.org/ontology#"
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:owl="http://www.w3.org/2002/07/owl#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
-    
   <owl:Ontology rdf:about=""/>
   
-  <!-- Flat FAQ Classes - NO hierarchy, NO relationships -->
+  <owl:Class rdf:about="#FAQ_ExampleQuestion">
+    <rdfs:label>What is X?</rdfs:label>
+    <rdfs:comment>X is... [complete answer]</rdfs:comment>
+  </owl:Class>
   
 </rdf:RDF>
 
-═══════════════════════════════════════════════════════════════════
-FINAL INSTRUCTION:
-═══════════════════════════════════════════════════════════════════
-
-Output ONLY the raw XML. Do NOT use markdown code blocks. Do NOT add explanations.
-Begin your response with: <?xml version="1.0"?>
-"""
+Output ONLY raw XML. Begin with <?xml"""
     
     def _get_schema_discovery_prompt(self, text: str, domain: str) -> str:
-        """Step 1: Analyze text and design Ontology Schema (Goal-Oriented)"""
-        return f"""Analyze the provided text and design an Ontology Schema that captures ALL knowledge needed to answer user questions.
+        """Step 1: Analyze text and design Ontology Schema"""
+        return f"""<role>You are a senior knowledge engineer creating an ontology for Q&A. Extract ALL information users might ask about.</role>
 
-═══════════════════════════════════════════════════════════════════
-DOMAIN CONTEXT: {domain}
-═══════════════════════════════════════════════════════════════════
+<context>
+DOMAIN: {domain}
+</context>
 
-INPUT TEXT:
+<source_text>
 {text}
+</source_text>
 
-═══════════════════════════════════════════════════════════════════
-YOUR TASK: Design a Schema for Actionable Knowledge
-═══════════════════════════════════════════════════════════════════
+<task>
+Analyze text and extract EVERYTHING. Think step-by-step:
 
-Imagine a user asking "How do I...?", "When...?", "Why...?", or "What is...?".
-Design a schema that can capture the answers to these questions.
+STEP 1 - ENTITIES: Organizations, documents, tools, roles, processes, concepts
+STEP 2 - RELATIONSHIPS: How entities connect (creates, uses, requires, part-of)
+STEP 3 - ATTRIBUTES: Properties with values (names, versions, durations, flags)
+STEP 4 - KEY PHRASES: Exact terms users will search for (definitions, slogans)
+STEP 5 - DENIALS: What something CANNOT, DOES NOT, or IS NOT
+STEP 6 - GOALS/PURPOSES: Why something exists, what it aims to achieve
+STEP 7 - OPERATIONS: Activities, processes, how things work
+STEP 8 - RECOMMENDATIONS: Advice, guidance, best practices
+STEP 9 - CONDITIONS: When/if something applies (conditions, prerequisites)
+STEP 10 - COMPARISONS: Differences between things (X vs Y, unlike Z)
+STEP 11 - QUANTITIES: Numbers, amounts, percentages mentioned
+STEP 12 - FAQ_PAIRS: Question-answer patterns found in text
+</task>
 
-Your schema MUST cover:
-1. **CONCEPTS (Nouns)**: The things/entities involved.
-2. **ACTIONS/TASKS (Verbs)**: What can be done? (Crucial for DSL mapping later).
-3. **PROCEDURES (Workflows)**: Steps to complete a task.
-4. **RULES/CONDITIONS**: When is an action allowed? 
-5. **QUANTITATIVE DATA**: Any numbers, prices, durations, deadlines.
-6. **KEY FACTS / ASSERTIONS**: Important statements/rules that don't fit into simple structures.
-7. **NEGATIVE FACTS** (CRITICAL for preventing hallucinations):
-   - Explicitly capture what the entity does NOT do, cannot do, or never does.
-   - Examples: "Does NOT collect user data", "Cannot provide legal advice", "Never charges fees".
-   - These prevent the AI from making false assumptions.
-8. **DISTINCTION OF SIMILAR CONCEPTS** (CRITICAL for accuracy):
-   - If two concepts seem similar but have different rules, create separate classes.
-9. **FOUNDATIONAL/DEPENDENCY RELATIONSHIPS** (CRITICAL for philosophical questions):
-   - Capture explicit dependencies: "depends on", "requires", "built on top of".
-   - Capture stance/position: "supports", "opposes", "against", "in favor of".
-   - Model these as relationships (dependsOn, supports) or as Assertion individuals.
+<critical_rules>
+- Extract ALL factual statements, not just main concepts
+- Capture operational details (how, why, what for)
+- Include purposes, goals, activities
+- Every denial/limitation must be captured
+- Key phrases = exact text users will search
+</critical_rules>
 
-
-Output a JSON object with the schema design.
-
-EXAMPLE OUTPUT FORMAT:
+<output_format>
 {{
   "classes": [
-    {{ "name": "PaymentPlatform", "description": "System processing payments" }},
-    {{ "name": "RefundAction", "description": "Task of returning funds" }}
+    {{"name": "EntityName", "definition": "Full description", "is_not": "What it is NOT (if stated)"}}
   ],
   "relationships": [
-    {{ "name": "performs", "domain": "User", "range": "Action" }},
-    {{ "name": "requiresCondition", "domain": "Action", "range": "Condition" }}
+    {{"name": "relationName", "domain": "Subject", "range": "Object", "description": "Meaning"}}
   ],
   "attributes": [
-    {{ "name": "duration", "type": "string" }},
-    {{ "name": "amount", "type": "decimal" }}
+    {{"name": "attrName", "type": "string|number|boolean", "applies_to": "ClassName"}}
   ],
-  "special_structures": "Model 'Refund Process' as a sequence of Actions. Capture 'TimeLimit' as a condition."
+  "key_phrases": ["phrase 1", "phrase 2"],
+  "denials": ["X does not Y", "X is not Z"],
+  "goals": ["purpose 1", "objective 2"],
+  "operations": ["activity 1", "process 2"],
+  "recommendations": ["should do X", "best practice Y"],
+  "conditions": ["if X then Y", "when Z applies"],
+  "comparisons": ["X differs from Y in...", "unlike Z"],
+  "quantities": ["N percent", "amount of X"],
+  "faq_pairs": [{{"q": "question", "a": "answer"}}]
 }}
+</output_format>
 
-Output ONLY the JSON.
-"""
+Output ONLY valid JSON."""
 
     def _get_ontology_generation_prompt(self, text: str, domain: str, schema: Any) -> str:
         """Step 2: Generate OWL based on Schema"""
-        return f"""You are an expert Ontology Engineer. Convert the provided text into a valid OWL ontology based on the DESIGN SCHEMA.
+        schema_json = json.dumps(schema, indent=2) if isinstance(schema, dict) else schema
+        return f"""<role>You are an OWL ontology expert. Convert the schema into a complete, searchable ontology.</role>
 
-═══════════════════════════════════════════════════════════════════
-DESIGN SCHEMA (Follow this structure):
-═══════════════════════════════════════════════════════════════════
-{json.dumps(schema, indent=2) if isinstance(schema, dict) else schema}
+<schema>
+{schema_json}
+</schema>
 
-═══════════════════════════════════════════════════════════════════
-INPUT TEXT:
-═══════════════════════════════════════════════════════════════════
+<source_text>
 {text}
+</source_text>
 
-═══════════════════════════════════════════════════════════════════
-INSTRUCTIONS:
-═══════════════════════════════════════════════════════════════════
+<instructions>
+Create OWL elements:
 
-1. Create owl:Class for each concept in the schema
-2. Create owl:ObjectProperty for each relationship in the schema
-3. Create owl:DatatypeProperty for each attribute in the schema
-4. Implement any special structures defined in the schema
-5. POPULATE the ontology with specific INSTANCES (owl:NamedIndividual) extracted from the text
-   - Extract ALL specific values, tools, entities mentioned
-   - Link them using the defined properties
-6. **CAPTURE NEGATIVE FACTS**: Create individuals/assertions for things that are explicitly stated as NOT happening
-   - Example: If text says "We do NOT track users", create an Assertion individual for this
-   - This prevents hallucinations where AI fills gaps with assumptions
+1. **owl:Class** - Each concept with FULL definition in rdfs:comment
+2. **owl:ObjectProperty** - Relationships with domain/range  
+3. **owl:DatatypeProperty** - Attributes with xsd types
+4. **owl:NamedIndividual** - Include:
+   - DENIALS: Things entity does NOT do (prefix: DENIAL_)
+   - KEY_PHRASES: Exact searchable terms (prefix: KP_)
+   - EXAMPLES: Specific instances from text (prefix: EX_)
+</instructions>
 
-CRITICAL REQUIREMENTS FOR DESCRIPTIONS:
-Every <owl:Class> and <owl:NamedIndividual> MUST have a RICH <rdfs:comment>.
+<critical_rules>
+RULE 1: rdfs:label = SHORT name (2-5 words)
+RULE 2: rdfs:comment = FULL DESCRIPTION from source text (1-3 sentences minimum!)
+RULE 3: rdfs:comment MUST BE DIFFERENT AND LONGER than rdfs:label
+RULE 4: COPY explanations from source text into rdfs:comment verbatim
+RULE 5: Never leave rdfs:comment empty or identical to label
+</critical_rules>
 
-DESCRIPTION MUST:
-1. Include purpose, use cases, and context
-2. Add synonyms/alternative terms users might search
-3. Specify when/why someone would use this
-4. Avoid generic one-liners
-5. **For similar concepts, explicitly state the DIFFERENCE**
-
-GOOD Example (Rich):
-<owl:NamedIndividual rdf:about="#Action_EditArticle">
-  <rdfs:comment>Edit an article to fix errors, correct mistakes, improve content, update outdated information, or add missing details. This allows users to modify articles when discovering inaccuracies.</rdfs:comment>
+<wrong_example>
+<!-- WRONG: comment same as label -->
+<owl:NamedIndividual rdf:about="#KP_Something">
+  <rdfs:label>Something</rdfs:label>
+  <rdfs:comment>Something</rdfs:comment>  <!-- BAD! -->
 </owl:NamedIndividual>
+</wrong_example>
 
-═══════════════════════════════════════════════════════════════════
-REQUIRED NAMESPACES:
-═══════════════════════════════════════════════════════════════════
-xmlns="http://example.org/ontology#"
+<correct_example>
+<!-- CORRECT: comment has FULL description from source -->
+<owl:NamedIndividual rdf:about="#KP_Something">
+  <rdfs:label>Something</rdfs:label>
+  <rdfs:comment>Something is a concept that represents X. It is used for Y and provides Z functionality according to the source text.</rdfs:comment>
+</owl:NamedIndividual>
+</correct_example>
+
+<template>
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.org/ontology#"
 xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 xmlns:owl="http://www.w3.org/2002/07/owl#"
-xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-
-═══════════════════════════════════════════════════════════════════
-OUTPUT TEMPLATE:
-═══════════════════════════════════════════════════════════════════
-<?xml version="1.0"?>
-<rdf:RDF ...>
+xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
   <owl:Ontology rdf:about=""/>
-  
-  <!-- Classes -->
-  
-  <!-- Properties -->
-  
-  <!-- Instances (The most important part!) -->
-  
+  <!-- Your OWL content here -->
 </rdf:RDF>
+</template>
 
-Output ONLY the raw XML. Begin with <?xml version="1.0"?>
-"""
+Output ONLY raw XML starting with <?xml"""
+    
+    def fix_xml_issues(self, owl_content: str) -> str:
+        """
+        Auto-fix common XML issues in LLM-generated OWL
+        
+        Common issues:
+        - Unescaped & (should be &amp;)
+        - Unescaped < > in text content
+        - Missing closing tags
+        """
+        import re
+        
+        fixed = owl_content
+        
+        # Fix unescaped & (but not already escaped like &amp; &lt; &gt; &quot; &apos;)
+        # Match & not followed by amp; lt; gt; quot; apos; #
+        fixed = re.sub(r'&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)', '&amp;', fixed)
+        
+        # Fix unescaped < in text content (not tag start)
+        # This is tricky - look for < not followed by valid tag chars or /
+        # For now, just fix common patterns like "A < B" or "A<B" that aren't tags
+        
+        # Fix common Unicode issues that cause XML parsing errors
+        # Remove control characters (except tab, newline, carriage return)
+        fixed = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', fixed)
+        
+        # Ensure proper closing
+        if not fixed.rstrip().endswith('</rdf:RDF>'):
+            # Try to find last complete element and close
+            if '<rdf:RDF' in fixed and '</rdf:RDF>' not in fixed:
+                fixed = fixed.rstrip() + '\n</rdf:RDF>'
+        
+        return fixed
     
     def validate_owl(self, owl_content: str) -> Dict[str, Any]:
         """
-        Basic validation of OWL content
+        Basic validation of OWL content with auto-fix attempt
         
         Returns:
             Dict with validation results
@@ -556,17 +568,25 @@ Output ONLY the raw XML. Begin with <?xml version="1.0"?>
             issues.append("No classes defined")
         
         # Try to parse as XML (basic check)
+        fixed_content = owl_content
         try:
             from xml.etree import ElementTree as ET
             ET.fromstring(owl_content)
         except Exception as e:
-            issues.append(f"XML parsing error: {str(e)[:100]}")
+            # Try auto-fix
+            fixed_content = self.fix_xml_issues(owl_content)
+            try:
+                ET.fromstring(fixed_content)
+                issues.append(f"XML auto-fixed: original had {str(e)[:50]}")
+            except Exception as e2:
+                issues.append(f"XML parsing error: {str(e)[:100]}")
         
         return {
-            "valid": len(issues) == 0,
+            "valid": len([i for i in issues if "XML parsing error" in i]) == 0,
             "issues": issues,
             "class_count": owl_content.count("<owl:Class") + owl_content.count("<Class"),
-            "property_count": owl_content.count("Property")
+            "property_count": owl_content.count("Property"),
+            "fixed_content": fixed_content if fixed_content != owl_content else None
         }
     
     def process_file(self, file_path: str, domain: str = "general") -> Dict[str, Any]:
@@ -645,6 +665,91 @@ Output ONLY the raw XML. Begin with <?xml version="1.0"?>
             "validation": validation,
             "generated_at": datetime.now().isoformat()
         }
+    
+    def process_url_chunked(self, url: str, domain: str = "general", 
+                           chunk_size: int = 30000, overlap: int = 1000) -> Dict[str, Any]:
+        """
+        Process large web URL by chunking and generating multiple ontologies.
+        
+        Args:
+            url: Web page URL
+            domain: Domain context
+            chunk_size: Max chars per chunk (default: 30000)
+            overlap: Overlap between chunks (default: 1000)
+            
+        Returns:
+            Dict with list of OWL contents, one per chunk
+        """
+        import hashlib
+        
+        print(f"🌐 Extracting text from URL: {url}")
+        text = self.extract_text_from_url(url)
+        
+        if not text or len(text) < 50:
+            raise ValueError("Extracted text is too short or empty")
+        
+        print(f"   Total text length: {len(text)} characters")
+        
+        # Chunk the text
+        chunks = chunk_text(text, chunk_size, overlap)
+        print(f"   Split into {len(chunks)} chunks")
+        
+        # Generate group_id from URL hash
+        group_id = hashlib.md5(url.encode()).hexdigest()[:12]
+        
+        results = []
+        for i, chunk in enumerate(chunks):
+            print(f"\n📝 Processing chunk {i+1}/{len(chunks)} ({len(chunk)} chars)...")
+            
+            try:
+                # Add chunk context to domain
+                chunk_domain = f"{domain} (Part {i+1}/{len(chunks)})"
+                
+                # Generate ontology for this chunk
+                owl_content = self.generate_ontology(chunk, chunk_domain)
+                validation = self.validate_owl(owl_content)
+                
+                results.append({
+                    "owl_content": owl_content,
+                    "chunk_index": i,
+                    "chunk_size": len(chunk),
+                    "validation": validation,
+                    "success": True
+                })
+                
+                print(f"   ✓ Chunk {i+1}: {validation['class_count']} classes")
+                
+            except Exception as e:
+                print(f"   ❌ Chunk {i+1} failed: {e}")
+                results.append({
+                    "owl_content": None,
+                    "chunk_index": i,
+                    "chunk_size": len(chunk),
+                    "error": str(e),
+                    "success": False
+                })
+        
+        # Summary
+        successful = [r for r in results if r['success']]
+        total_classes = sum(r['validation']['class_count'] for r in successful)
+        
+        print(f"\n✅ Completed: {len(successful)}/{len(chunks)} chunks successful")
+        print(f"   Total classes: {total_classes}")
+        
+        return {
+            "source_url": url,
+            "source_type": "url_chunked",
+            "group_id": group_id,
+            "total_text_length": len(text),
+            "chunk_count": len(chunks),
+            "chunk_size": chunk_size,
+            "overlap": overlap,
+            "chunks": results,
+            "successful_chunks": len(successful),
+            "total_classes": total_classes,
+            "generated_at": datetime.now().isoformat()
+        }
+
 
 
 def main():

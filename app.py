@@ -15,6 +15,8 @@ from ontology_manager import OntologyManager, ProcessingStatus
 from scripts.parse_owl import OWLParser
 from build_hypergraph import build_hypergraph
 from query_engine.generic_query_engine import GenericQueryEngine
+from query_engine.hypergraph_query_engine import HyperGraphQueryEngine
+from query_engine.multi_ontology_engine import MultiOntologyQueryEngine
 from ontology_generator import OntologyGenerator
 
 
@@ -67,6 +69,9 @@ if 'current_ontology_id' not in st.session_state:
 if 'query_engine' not in st.session_state:
     st.session_state.query_engine = None
 
+if 'engine_type' not in st.session_state:
+    st.session_state.engine_type = 'hypergraph'  # Default to new engine
+
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
@@ -75,6 +80,9 @@ if 'page' not in st.session_state:
 
 if 'generated_owl' not in st.session_state:
     st.session_state.generated_owl = None
+
+if 'ontology_group' not in st.session_state:
+    st.session_state.ontology_group = None  # For grouped ontologies (chunked)
 
 
 def process_ontology(ontology_id: str, owl_file: str, manager: OntologyManager):
@@ -260,6 +268,20 @@ def generate_ontology_page():
         
         mode_value = "structured" if "Structured" in ontology_mode else "flat"
         
+        # Chunked mode for large pages
+        use_chunked = st.checkbox(
+            "🔀 Chunked Mode (for large pages)",
+            value=False,
+            help="Split large pages into multiple chunks, generate separate ontologies for each. Recommended for FAQ pages with 50+ questions."
+        )
+        
+        if use_chunked:
+            col1, col2 = st.columns(2)
+            with col1:
+                chunk_size = st.number_input("Chunk size (chars)", value=30000, min_value=5000, max_value=100000)
+            with col2:
+                overlap = st.number_input("Overlap (chars)", value=1000, min_value=0, max_value=5000)
+        
         if url and st.button("🤖 Generate Ontology", type="primary"):
             with st.spinner(f"Analyzing web page with {model_name} ({mode_value} mode)..."):
                 try:
@@ -279,19 +301,79 @@ def generate_ontology_page():
                             ontology_mode=mode_value
                         )
                     
-                    generated_result = generator.process_url(
-                        url,
-                        domain=domain or "general"
-                    )
-                    
-                    # Store schema if available (for structured mode)
-                    if hasattr(generator, 'last_discovered_schema'):
-                        generated_result['discovered_schema'] = generator.last_discovered_schema
-                    
-                    # Store in session
-                    st.session_state.generated_owl = generated_result
-                    
-                    st.success("✅ Ontology generated successfully!")
+                    if use_chunked:
+                        # Chunked mode - generate multiple ontologies
+                        st.info(f"📦 Chunked mode: Splitting into ~{chunk_size} char chunks...")
+                        
+                        chunked_result = generator.process_url_chunked(
+                            url,
+                            domain=domain or "general",
+                            chunk_size=chunk_size,
+                            overlap=overlap
+                        )
+                        
+                        # Process each successful chunk
+                        if chunked_result['successful_chunks'] > 0:
+                            # Save each chunk's OWL file
+                            import tempfile
+                            owl_files = []
+                            
+                            for chunk_data in chunked_result['chunks']:
+                                if chunk_data['success']:
+                                    # Save to temp file
+                                    temp_owl = tempfile.NamedTemporaryFile(
+                                        mode='w', suffix='.owl', delete=False, encoding='utf-8'
+                                    )
+                                    temp_owl.write(chunk_data['owl_content'])
+                                    temp_owl.close()
+                                    owl_files.append(temp_owl.name)
+                            
+                            # Add as group to manager
+                            group_name = url.split('/')[-1] or "web_page"
+                            ontology_ids = st.session_state.manager.add_ontology_group(
+                                owl_files=owl_files,
+                                group_id=chunked_result['group_id'],
+                                group_name=group_name,
+                                source_url=url
+                            )
+                            
+                            # Process each ontology
+                            for onto_id in ontology_ids:
+                                onto_info = st.session_state.manager.get_ontology(onto_id)
+                                owl_file_path = onto_info['owl_file']
+                                
+                                thread = threading.Thread(
+                                    target=process_ontology,
+                                    args=(onto_id, owl_file_path, st.session_state.manager)
+                                )
+                                thread.daemon = True
+                                thread.start()
+                            
+                            # Cleanup temp files
+                            for f in owl_files:
+                                Path(f).unlink(missing_ok=True)
+                            
+                            st.success(f"✅ Created {len(ontology_ids)} ontologies from {chunked_result['chunk_count']} chunks!")
+                            st.info(f"Total classes: {chunked_result['total_classes']}")
+                            time.sleep(2)
+                            st.rerun()
+                        else:
+                            st.error("❌ No chunks were processed successfully")
+                    else:
+                        # Normal single ontology mode
+                        generated_result = generator.process_url(
+                            url,
+                            domain=domain or "general"
+                        )
+                        
+                        # Store schema if available (for structured mode)
+                        if hasattr(generator, 'last_discovered_schema'):
+                            generated_result['discovered_schema'] = generator.last_discovered_schema
+                        
+                        # Store in session
+                        st.session_state.generated_owl = generated_result
+                        
+                        st.success("✅ Ontology generated successfully!")
                     
                 except Exception as e:
                     st.error(f"❌ Generation failed: {e}")
@@ -474,36 +556,85 @@ def upload_page():
                 st.success(f"Processing started! Ontology ID: {ontology_id[:8]}")
                 st.rerun()
     
-    # Show existing ontologies
+    # Show existing ontologies (with groups)
     st.markdown("---")
     st.markdown("### Your Ontologies")
     
-    ontologies = st.session_state.manager.list_ontologies()
+    # Get grouped + individual ontologies
+    ontology_groups = st.session_state.manager.list_ontology_groups()
     
-    if ontologies:
-        for onto in ontologies:
-            with st.expander(f"📚 {onto['name']} - {onto['status'].upper()}"):
-                col1, col2, col3 = st.columns([2, 2, 1])
+    if ontology_groups:
+        for item in ontology_groups:
+            if item['type'] == 'group':
+                # Grouped ontology (from chunked source)
+                icon = "📦"
+                label = f"{icon} {item['name']} ({item['ontology_count']} parts)"
                 
-                with col1:
-                    st.write(f"**ID:** {onto['id'][:16]}")
-                    st.write(f"**Created:** {onto['created_at'][:19]}")
-                
-                with col2:
-                    st.write(f"**Status:** {onto['status']}")
-                    if onto['metadata']:
-                        meta = onto['metadata']
-                        st.write(f"**Terms:** {meta.get('active_terms', 'N/A'):,}")
-                
-                with col3:
-                    if onto['status'] == 'ready':
-                        if st.button("Chat", key=f"chat_{onto['id']}"):
-                            st.session_state.current_ontology_id = onto['id']
+                with st.expander(f"{label} - {item['status'].upper()}"):
+                    st.write(f"**Source:** {item.get('source_url', 'N/A')}")
+                    st.write(f"**Parts:** {item['ontology_count']} ontologies")
+                    st.write(f"**Status:** {item['status']}")
+                    
+                    col1, col2 = st.columns([1, 1])
+                    with col1:
+                        if item['status'] == 'ready':
+                            if st.button("💬 Chat (Multi)", key=f"chat_group_{item['id']}"):
+                                # Set group for multi-ontology query
+                                st.session_state.ontology_group = item
+                                st.session_state.current_ontology_id = item['ontology_ids'][0]  # First as reference
+                                st.session_state.query_engine = None  # Force reload
+                                st.rerun()
+                        else:
+                            st.info("Processing...")
+                    
+                    with col2:
+                        if st.button("🗑️ Delete", key=f"del_group_{item['id']}"):
+                            for onto_id in item['ontology_ids']:
+                                st.session_state.manager.delete_ontology(onto_id)
                             st.rerun()
-                    elif onto['status'] == 'error':
-                        st.error("Error!")
-                    else:
-                        st.info("Processing...")
+                    
+                    # Show individual parts for testing
+                    if item['status'] == 'ready':
+                        st.markdown("---")
+                        st.caption("Test individual parts:")
+                        for i, onto_id in enumerate(item['ontology_ids']):
+                            onto = st.session_state.manager.get_ontology(onto_id)
+                            if onto and onto['status'] == 'ready':
+                                if st.button(f"Part {i+1}", key=f"chat_part_{onto_id}"):
+                                    st.session_state.ontology_group = None  # Clear group
+                                    st.session_state.current_ontology_id = onto_id
+                                    st.session_state.query_engine = None
+                                    st.rerun()
+            else:
+                # Single ontology
+                onto = st.session_state.manager.get_ontology(item['id'])
+                if not onto:
+                    continue
+                    
+                with st.expander(f"📚 {onto['name']} - {onto['status'].upper()}"):
+                    col1, col2, col3 = st.columns([2, 2, 1])
+                    
+                    with col1:
+                        st.write(f"**ID:** {onto['id'][:16]}")
+                        st.write(f"**Created:** {onto['created_at'][:19]}")
+                    
+                    with col2:
+                        st.write(f"**Status:** {onto['status']}")
+                        if onto['metadata']:
+                            meta = onto['metadata']
+                            st.write(f"**Terms:** {meta.get('active_terms', 'N/A'):,}")
+                    
+                    with col3:
+                        if onto['status'] == 'ready':
+                            if st.button("Chat", key=f"chat_{onto['id']}"):
+                                st.session_state.ontology_group = None  # Clear group
+                                st.session_state.current_ontology_id = onto['id']
+                                st.session_state.query_engine = None
+                                st.rerun()
+                        elif onto['status'] == 'error':
+                            st.error("Error!")
+                        else:
+                            st.info("Processing...")
     else:
         st.info("No ontologies yet. Upload one above!")
 
@@ -589,9 +720,7 @@ def chat_page():
     
     # Load query engine if needed
     if st.session_state.query_engine is None:
-        with st.spinner("Loading query engine..."):
-            parsed_dir = st.session_state.manager.get_parsed_dir(onto_id)
-            
+        with st.spinner(f"Loading {st.session_state.engine_type} query engine..."):
             # Get configuration from CONFIG
             use_ollama = CONFIG.get('USE_OLLAMA', True)
             ollama_model = CONFIG.get('OLLAMA_MODEL', 'llama3.3:70b')
@@ -603,15 +732,57 @@ def chat_page():
             api_base_url = CONFIG.get('openai_base_url')
             
             try:
-                st.session_state.query_engine = GenericQueryEngine(
-                    str(parsed_dir),
-                    use_ollama=use_ollama,
-                    ollama_model=ollama_model,
-                    ollama_base_url=f"{ollama_base_url}/v1",
-                    api_key=api_key,
-                    api_model=api_model,
-                    api_base_url=api_base_url
-                )
+                # Check if this is a grouped ontology (multi-ontology query)
+                if st.session_state.ontology_group:
+                    group = st.session_state.ontology_group
+                    
+                    # Get parsed directories for all ontologies in group
+                    ontology_dirs = []
+                    for onto_id in group['ontology_ids']:
+                        parsed_dir = st.session_state.manager.get_parsed_dir(onto_id)
+                        if parsed_dir:
+                            ontology_dirs.append(str(parsed_dir))
+                    
+                    if ontology_dirs:
+                        st.info(f"🔄 Loading {len(ontology_dirs)} ontologies for multi-query...")
+                        st.session_state.query_engine = MultiOntologyQueryEngine(
+                            ontology_dirs,
+                            engine_type=st.session_state.engine_type,
+                            use_ollama=use_ollama,
+                            ollama_model=ollama_model,
+                            ollama_base_url=f"{ollama_base_url}/v1",
+                            api_key=api_key,
+                            api_model=api_model,
+                            api_base_url=api_base_url
+                        )
+                    else:
+                        st.error("No parsed directories found for group!")
+                        return
+                else:
+                    # Single ontology mode
+                    parsed_dir = st.session_state.manager.get_parsed_dir(onto_id)
+                    
+                    # Select engine based on type
+                    if st.session_state.engine_type == 'hypergraph':
+                        st.session_state.query_engine = HyperGraphQueryEngine(
+                            str(parsed_dir),
+                            use_ollama=use_ollama,
+                            ollama_model=ollama_model,
+                            ollama_base_url=f"{ollama_base_url}/v1",
+                            api_key=api_key,
+                            api_model=api_model,
+                            api_base_url=api_base_url
+                        )
+                    else:  # generic
+                        st.session_state.query_engine = GenericQueryEngine(
+                            str(parsed_dir),
+                            use_ollama=use_ollama,
+                            ollama_model=ollama_model,
+                            ollama_base_url=f"{ollama_base_url}/v1",
+                            api_key=api_key,
+                            api_model=api_model,
+                            api_base_url=api_base_url
+                        )
             except Exception as e:
                 st.error(f"Error loading engine: {e}")
                 return
@@ -619,16 +790,41 @@ def chat_page():
     engine = st.session_state.query_engine
     metadata = onto_info['metadata']
     
+    # Check if multi-ontology mode
+    is_multi = st.session_state.ontology_group is not None
+    
     # Header
-    col1, col2 = st.columns([3, 1])
+    col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        st.title(f"💬 Chat with {onto_info['name']}")
-        st.caption(f"{metadata['ontology_name']} • {metadata['active_terms']:,} terms")
+        if is_multi:
+            group = st.session_state.ontology_group
+            st.title(f"💬 Chat with {group['name']}")
+            multi_badge = f"📦 Multi ({group['ontology_count']} parts)"
+            engine_badge = "🔥 HyperGraph" if st.session_state.engine_type == 'hypergraph' else "📊 Generic"
+            st.caption(f"{multi_badge} • {engine_badge}")
+        else:
+            st.title(f"💬 Chat with {onto_info['name']}")
+            engine_badge = "🔥 HyperGraph" if st.session_state.engine_type == 'hypergraph' else "📊 Generic"
+            st.caption(f"{metadata['ontology_name']} • {metadata['active_terms']:,} terms • {engine_badge}")
     
     with col2:
+        # Engine selector
+        new_engine = st.selectbox(
+            "Query Engine:",
+            ["hypergraph", "generic"],
+            index=0 if st.session_state.engine_type == 'hypergraph' else 1,
+            key="engine_selector"
+        )
+        if new_engine != st.session_state.engine_type:
+            st.session_state.engine_type = new_engine
+            st.session_state.query_engine = None  # Force reload
+            st.rerun()
+    
+    with col3:
         if st.button("← Change Ontology"):
             st.session_state.current_ontology_id = None
             st.session_state.query_engine = None
+            st.session_state.ontology_group = None  # Clear group
             st.session_state.chat_history = []
             st.rerun()
     

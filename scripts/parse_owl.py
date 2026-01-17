@@ -77,6 +77,14 @@ class OWLParser:
             self.prefix_counts['CLASS'] += 1  # Default prefix
             return name  # Return as-is, e.g., "Producer"
         
+        # NEW: Handle rdf:about without # (e.g., rdf:about="CreativeCommons")
+        # This is common when LLM generates OWL without proper fragment prefix
+        if not uri.startswith('http') and not uri.startswith('#'):
+            # Plain name like "CreativeCommons"
+            if re.match(r'^[A-Za-z][A-Za-z0-9_]*$', uri):
+                self.prefix_counts['CLASS'] += 1
+                return uri  # Return as-is
+        
         # Check if this is a secondary namespace (e.g., icdo.owl/ICDO_)
         is_secondary_namespace = False
         if re.search(r'/[a-z]+\.owl/[A-Z]', uri):

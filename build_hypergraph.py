@@ -201,36 +201,53 @@ def flatten_term_to_facts(term_data: Dict[str, Any], key_prefix: str) -> list:
 
 
 def get_ollama_embeddings(texts: List[str], model: str = "nomic-embed-text", 
-                         base_url: str = "http://localhost:11434") -> np.ndarray:
+                         base_url: str = "http://localhost:11434",
+                         batch_size: int = 50) -> np.ndarray:
     """
-    Get embeddings from Ollama
+    Get embeddings from Ollama with batching support
     
     Args:
         texts: List of texts to embed
         model: Ollama embedding model name
         base_url: Ollama server URL
+        batch_size: Number of texts to embed per request (default: 50)
         
     Returns:
         Embeddings as numpy array
     """
     embeddings = []
+    total_batches = (len(texts) + batch_size - 1) // batch_size
     
-    for text in tqdm(texts, desc=f"Getting embeddings from Ollama ({model})"):
+    for i in tqdm(range(0, len(texts), batch_size), desc=f"Getting embeddings from Ollama ({model})", total=total_batches):
+        batch = texts[i:i + batch_size]
         try:
+            # Ollama /api/embed supports batch inputs
             response = requests.post(
                 f"{base_url}/api/embed",
-                json={"model": model, "input": text},
-                timeout=30
+                json={"model": model, "input": batch},
+                timeout=120  # Longer timeout for batches
             )
             response.raise_for_status()
-            embedding = response.json()['embeddings'][0]
-            embeddings.append(embedding)
+            batch_embeddings = response.json()['embeddings']
+            embeddings.extend(batch_embeddings)
         except Exception as e:
-            print(f"Error getting embedding: {e}")
-            # Fallback to zero vector
-            embeddings.append([0.0] * 768)  # Default dimension
+            print(f"Error getting batch embeddings: {e}")
+            # Fallback: try one by one for this batch
+            for text in batch:
+                try:
+                    response = requests.post(
+                        f"{base_url}/api/embed",
+                        json={"model": model, "input": text},
+                        timeout=30
+                    )
+                    response.raise_for_status()
+                    embedding = response.json()['embeddings'][0]
+                    embeddings.append(embedding)
+                except:
+                    embeddings.append([0.0] * 768)
     
     return np.array(embeddings)
+
 
 
 def build_hypergraph(ontology_dir: str, model_name: str = "nomic-embed-text",
@@ -373,13 +390,16 @@ def build_hypergraph(ontology_dir: str, model_name: str = "nomic-embed-text",
     np.save(val_emb_file, value_embeddings)
     print(f"  ✓ Saved value embeddings to {val_emb_file}")
     
+    # Handle empty embeddings case
+    embedding_dim = key_embeddings.shape[1] if key_embeddings.ndim == 2 and key_embeddings.shape[0] > 0 else 0
+    
     # Update metadata with hypergraph info
     metadata['hypergraph'] = {
         'model': ollama_model if use_ollama else model_name,
         'use_ollama': use_ollama,
         'total_facts': len(all_facts),
         'total_hypernodes': len(hypernodes),
-        'embedding_dim': key_embeddings.shape[1],
+        'embedding_dim': embedding_dim,
         'files': {
             'facts': str(facts_file.name),
             'hypernodes': str(hypernodes_file.name),
@@ -399,7 +419,7 @@ def build_hypergraph(ontology_dir: str, model_name: str = "nomic-embed-text",
     print(f"  Ontology: {ontology_name}")
     print(f"  HyperEdges (facts): {len(all_facts):,}")
     print(f"  HyperNodes: {len(hypernodes):,}")
-    print(f"  Embedding dimension: {key_embeddings.shape[1]}")
+    print(f"  Embedding dimension: {embedding_dim}")
     print(f"  Output: {output_dir}\n")
     
     return metadata

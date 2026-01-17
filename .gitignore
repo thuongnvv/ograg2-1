@@ -37,7 +37,6 @@ ENV/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-results/
 data/kg/*/onto_hypernode_embeddings.npy
 data/kg/*/summarized_texts.md
 
@@ -50,7 +49,7 @@ data/kg/*/hypergraph/*.pkl
 # Large CSV data files
 *.csv
 !requirements*.txt
-
+data/ontologies
 data/ontologies/*/parsed/*.npy
 data/ontologies/*/parsed/*.pkl
 # Keep metadata and index

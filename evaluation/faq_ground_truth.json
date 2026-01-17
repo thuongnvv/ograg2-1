@@ -1,0 +1,296 @@
+{
+    "dataset_info": {
+        "source": "https://creativecommons.org/faq/",
+        "created_date": "2026-01-09",
+        "description": "Ground truth Q&A pairs from Creative Commons FAQ for RAG evaluation",
+        "total_questions": 80,
+        "categories": [
+            "About CC",
+            "General License Information",
+            "For Licensors",
+            "For Licensees",
+            "Data",
+            "AI"
+        ]
+    },
+    "questions": [
+        {
+            "id": "q001",
+            "category": "About CC",
+            "question": "What is Creative Commons and what do you do?",
+            "reference_answer": "Creative Commons is a global nonprofit organization that enables sharing and reuse of creativity and knowledge through the provision of free legal tools. Our legal tools help those who want to encourage reuse of their works by offering them for use under generous, standardized terms; those who want to make creative uses of works; and those who want to benefit from this symbiosis. Our vision is to help others realize the full potential of the internet. CC has affiliates all over the world who help ensure our licenses work internationally and who raise awareness of our work.\n\nAlthough Creative Commons is best known for its licenses, our work extends beyond just providing copyright licenses. CC offers other legal and technical tools that also facilitate sharing and discovery of creative works, such as CC0, a public domain dedication for rights holders who wish to put their work into the public domain before the expiration of copyright, and the Public Domain Mark, a tool for marking a work that is in the worldwide public domain. Creative Commons licenses and tools were designed specifically to work with the web, which makes content that is offered under their terms easy to search for, discover, and use.",
+            "key_concepts": [
+                "nonprofit",
+                "free legal tools",
+                "sharing",
+                "CC0",
+                "Public Domain Mark",
+                "international"
+            ],
+            "difficulty": "easy"
+        },
+        {
+            "id": "q002",
+            "category": "About CC",
+            "question": "Is Creative Commons against copyright?",
+            "reference_answer": "Absolutely not. CC has responded to claims to the contrary. CC licenses are copyright licenses, and depend on the existence of copyright to work. CC licenses are legal tools that creators and other rights holders can use to offer certain usage rights to the public, while reserving other rights. Those who want to make their work available to the public for limited kinds of uses while preserving their copyright may want to consider using CC licenses. Others who want to reserve all of their rights under copyright law should not use CC licenses.\n\nThat said, Creative Commons recognizes the need for change in copyright law, and many members of the Creative Commons community are active participants in the copyright reform movement.",
+            "key_concepts": [
+                "copyright licenses",
+                "depend on copyright",
+                "usage rights",
+                "copyright reform"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q003",
+            "category": "About CC",
+            "question": "What does 'Some Rights Reserved' mean?",
+            "reference_answer": "Copyright grants to creators a bundle of exclusive rights over their creative works, which generally include, at a minimum, the right to reproduce, distribute, display, and make adaptations. The phrase 'All Rights Reserved' is often used by owners to indicate that they reserve all of the rights granted to them under the law. When copyright expires, the work enters the public domain, and the rights holder can no longer stop others from engaging in those activities under copyright, with the exception of moral rights reserved to creators in some jurisdictions. Creative Commons licenses offer creators a spectrum of choices between retaining all rights and relinquishing all rights (public domain), an approach we call 'Some Rights Reserved.'",
+            "key_concepts": [
+                "exclusive rights",
+                "All Rights Reserved",
+                "public domain",
+                "spectrum of choices",
+                "Some Rights Reserved"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q004",
+            "category": "About CC",
+            "question": "Can Creative Commons give legal advice about its licenses or other tools, or help with CC license enforcement?",
+            "reference_answer": "No. Creative Commons is not a law firm and does not provide legal advice or legal services. CC is similar to a self-help service that offers free, form-based legal documents for others to use. While CC does provide informational guidance about its licenses and other tools, this information may not apply to your particular situation, and should never be taken as legal advice.\n\nIf you're looking for legal advice about using CC licenses and other tools, we recommend contacting the Creative Commons affiliate in your jurisdiction. CC affiliates are highly connected to the communities of copyright lawyers in their countries. We also offer a list of lawyers and organizations who have identified themselves as willing to provide information to others about CC licensing issues. However, please note that CC does not provide referral services, and does not endorse or recommend any person on that list.",
+            "key_concepts": [
+                "not a law firm",
+                "no legal advice",
+                "self-help service",
+                "CC affiliates",
+                "lawyers list"
+            ],
+            "difficulty": "easy"
+        },
+        {
+            "id": "q005",
+            "category": "About CC",
+            "question": "Does Creative Commons collect or track material licensed under a CC license?",
+            "reference_answer": "No, CC does not collect content or track licensed material. However, CC builds technical tools that help the public search for and use works licensed under our licenses and other legal tools, and many others have built such tools as well. CC Search is one tool developed by CC to help the public discover works offered under Creative Commons licenses on the internet via CC-aware search engines and repositories.",
+            "key_concepts": [
+                "does not collect",
+                "does not track",
+                "CC Search",
+                "search tools"
+            ],
+            "difficulty": "easy"
+        },
+        {
+            "id": "q006",
+            "category": "About CC",
+            "question": "What do the Creative Commons buttons do?",
+            "reference_answer": "The CC buttons are a shorthand way to convey the basic permissions associated with material offered under CC licenses. Creators and owners who apply CC licenses to their material can download and apply those buttons to communicate to users the permissions granted in advance. When the material is offered online, the buttons should usually link out to the human-readable license deeds (which, in turn, link to the license itself).",
+            "key_concepts": [
+                "buttons",
+                "shorthand",
+                "permissions",
+                "license deeds",
+                "link"
+            ],
+            "difficulty": "easy"
+        },
+        {
+            "id": "q007",
+            "category": "About CC",
+            "question": "May I use the Creative Commons logo and buttons?",
+            "reference_answer": "You may download high resolution versions of the Creative Commons logos and use them in connection with your work or your website, provided you comply with our policies. Among other things, if you use the logos on a website or on your work, you may not alter the logos in any respect—such as by changing the font, the proportions, or the colors. CC's buttons, name, and corporate logo (the 'CC' in a circle) are trademarks of Creative Commons. You cannot use them in ways not permitted by our policies unless you first receive express, written permission. This means, for example, that you cannot (without our permission) print your own buttons and t-shirts using CC logos, although you can purchase them in CC's store.",
+            "key_concepts": [
+                "download logos",
+                "comply with policies",
+                "cannot alter",
+                "trademarks",
+                "written permission"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q008",
+            "category": "General License Information",
+            "question": "What are Creative Commons licenses?",
+            "reference_answer": "Creative Commons licenses provide an easy way to manage the copyright terms that attach automatically to all creative material under copyright. Our licenses allow that material to be shared and reused under terms that are flexible and legally sound. Creative Commons offers a core suite of six copyright licenses. Because there is no single 'Creative Commons license,' it is important to identify which of the six licenses you are applying to your material, which of the six licenses has been applied to material that you intend to use, and in both cases the specific version.\n\nAll of our licenses require that users provide attribution (BY) to the creator when the material is used and shared. Some licensors choose the BY license, which requires attribution to the creator as the only condition to reuse of the material. The other five licenses combine BY with one or more of three additional license elements: NonCommercial (NC), which prohibits commercial use of the material; NoDerivatives (ND), which prohibits the sharing of adaptations of the material; and ShareAlike (SA), which requires adaptations of the material be released under the same license.",
+            "key_concepts": [
+                "six licenses",
+                "attribution BY",
+                "NonCommercial NC",
+                "NoDerivatives ND",
+                "ShareAlike SA",
+                "flexible terms"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q009",
+            "category": "General License Information",
+            "question": "How do CC licenses operate?",
+            "reference_answer": "CC licenses are operative only when applied to material in which a copyright exists, and even then only when a particular use would otherwise not be permitted by copyright. Note that the latest version of CC licenses also applies to rights similar to copyright, such as neighboring rights and sui generis database rights. This means that CC license terms and conditions are not triggered by uses permitted under any applicable exceptions and limitations to copyright, nor do license terms and conditions apply to elements of a licensed work that are in the public domain. This also means that CC licenses do not contractually impose restrictions on uses of a work where there is no underlying copyright.\n\nAll CC licenses are non-exclusive: creators and owners can enter into additional, different licensing arrangements for the same material at any time (often referred to as 'dual-licensing' or 'multi-licensing'). However, CC licenses are not revocable once granted unless there has been a breach, and even then the license is terminated only for the breaching licensee.",
+            "key_concepts": [
+                "copyright exists",
+                "exceptions and limitations",
+                "non-exclusive",
+                "dual-licensing",
+                "not revocable"
+            ],
+            "difficulty": "hard"
+        },
+        {
+            "id": "q010",
+            "category": "General License Information",
+            "question": "Which is the latest version of the licenses offered by Creative Commons?",
+            "reference_answer": "In November 2013, Creative Commons published the version 4.0 license suite. These licenses are the most up-to-date licenses offered by CC, and are recommended over all prior versions. You can see how the licenses have been improved over time on the license versions page. 4.0 has been drafted to be internationally valid, and will have official translations becoming available after publication.",
+            "key_concepts": [
+                "version 4.0",
+                "November 2013",
+                "most up-to-date",
+                "internationally valid",
+                "recommended"
+            ],
+            "difficulty": "easy"
+        },
+        {
+            "id": "q011",
+            "category": "General License Information",
+            "question": "Do Creative Commons licenses affect exceptions and limitations to copyright, such as fair dealing and fair use?",
+            "reference_answer": "No. By design, CC licenses do not reduce, limit, or restrict any rights under exceptions and limitations to copyright, such as fair use or fair dealing. If your use of CC-licensed material would otherwise be allowed because of an applicable exception or limitation, you do not need to rely on the CC license or comply with its terms and conditions. This is a fundamental principle of CC licensing.",
+            "key_concepts": [
+                "do not reduce",
+                "fair use",
+                "fair dealing",
+                "exceptions and limitations",
+                "fundamental principle"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q012",
+            "category": "General License Information",
+            "question": "Who gives permission to use material offered under Creative Commons licenses?",
+            "reference_answer": "Our licenses and legal tools are intended for use by anyone who holds copyright in the material. This is often, but not always, the creator.\n\nCreative Commons offers licenses and tools to the public free of charge and does not require that creators or other rights holders register with CC in order to apply a CC license to a work. This means that CC does not have special knowledge of who uses the licenses and for what purposes, nor does CC have a way to contact creators beyond means generally available to the public. CC has no authority to grant permission on behalf of those persons, nor does CC manage those rights on behalf of others.\n\nIf you would like to obtain additional permissions to use the work beyond those granted by the license that has been applied, or if you're not sure if your intended use is permitted by the license, you should contact the rights holder.",
+            "key_concepts": [
+                "copyright holder",
+                "creator",
+                "no registration",
+                "contact rights holder",
+                "no authority to grant permission"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q013",
+            "category": "General License Information",
+            "question": "Are Creative Commons licenses enforceable in a court of law?",
+            "reference_answer": "Creative Commons licenses are drafted to be enforceable around the world, and have been enforced in court in various jurisdictions. To CC's knowledge, the licenses have never been held unenforceable or invalid.\n\nCC licenses contain a 'severability' clause. This allows a court to eliminate any provision determined to be unenforceable, and enforce the remaining provisions of the license.",
+            "key_concepts": [
+                "enforceable",
+                "enforced in court",
+                "never held invalid",
+                "severability clause"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q014",
+            "category": "General License Information",
+            "question": "What happens if someone applies a Creative Commons license to my work without my knowledge or authorization?",
+            "reference_answer": "CC alerts prospective licensors they need to have all necessary rights before applying a CC license to a work. If that is not the case and someone has marked your work with a CC license without your authorization, you should contact that person and tell them to remove the license from your work. You may also wish to contact a lawyer. Creative Commons is not a law firm and cannot represent you or give you legal advice, but there are lawyers who have identified themselves as interested in representing people in CC-related matters.",
+            "key_concepts": [
+                "unauthorized license",
+                "contact person",
+                "remove license",
+                "contact lawyer",
+                "CC cannot represent"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q015",
+            "category": "For Licensors",
+            "question": "What things should I think about before I apply a Creative Commons license?",
+            "reference_answer": "Applying a Creative Commons license to your material is a serious decision. When you apply a CC license, you give permission to anyone to use your material for the full duration of applicable copyright and similar rights.\n\nCC has identified some things that you should consider before you apply a CC license: Is the material copyrightable? If not, is it subject to neighboring rights or sui generis database rights? CC licenses do not apply to material in the public domain. Do you own the material you want to license? If not, are you otherwise authorized to license it under the specific CC license you are interested in using? You should not apply a license to material that you do not own or that you are not authorized to license. Are you aware that CC licenses are not revocable? You are free to stop offering material under a CC license at any time, but this will not affect the rights associated with any copies of your work already in circulation. Are you a member of a collecting society? If you are, you should make sure that you are able to use CC licenses for your materials.",
+            "key_concepts": [
+                "serious decision",
+                "copyrightable",
+                "own the material",
+                "not revocable",
+                "collecting society"
+            ],
+            "difficulty": "hard"
+        },
+        {
+            "id": "q016",
+            "category": "For Licensees",
+            "question": "What should I think about before using material offered under a Creative Commons license?",
+            "reference_answer": "CC offers six core licenses, each of which grants a different set of permissions. Before you use CC-licensed material, you should review the terms of the particular license to be sure your anticipated use is permitted. If you wish to use the work in a manner that is not permitted by the license, you should contact the rights holder (often the creator) to get permission first, or look for an alternative work that is licensed in a way that permits your anticipated use. Note that if you use material in a way that is not permitted by the applicable license and your use is not otherwise permitted by an applicable copyright exception or limitation, the license is automatically terminated and you may be liable for copyright infringement, even if you are eligible to have your rights reinstated later.\n\nBefore using material offered under a Creative Commons license, you should know that CC licenses only grant permissions needed under copyright and similar rights, and there may be additional rights you need to use it as intended. You should also understand that licensors do not offer warranties or guarantees about the material they are licensing unless expressly indicated otherwise. All materials are licensed 'AS IS' and a disclaimer of warranties applies unless expressly provided otherwise.",
+            "key_concepts": [
+                "review license terms",
+                "contact rights holder",
+                "automatically terminated",
+                "no warranties",
+                "AS IS"
+            ],
+            "difficulty": "hard"
+        },
+        {
+            "id": "q017",
+            "category": "For Licensees",
+            "question": "Does a Creative Commons license give me all the rights I need to use the work?",
+            "reference_answer": "It depends. CC licenses do not license rights other than copyright and similar rights (which include sui generis database rights in version 4.0). For example, they do not license trademark or patent rights, or the publicity, personality, and privacy rights of third parties. However, licensors agree to waive or not assert any moral rights, publicity rights, personality rights, or privacy rights they themselves hold, to the limited extent necessary to allow exercise of the licensed rights. Any rights outside of the scope of the license may require clearance (i.e., permission) in order to use the work as you would like.\n\nAdditionally, creative works sometimes incorporate works owned by others (known as 'third party content'), often used pursuant to a CC license or under an exception or limitation to copyright such as fair use in the U.S. You should make sure you have permission to use any third party content contained in the work you want to use, or that your use is otherwise allowed under the laws of your jurisdiction.",
+            "key_concepts": [
+                "copyright and similar rights",
+                "not trademark or patent",
+                "third party content",
+                "may require clearance"
+            ],
+            "difficulty": "hard"
+        },
+        {
+            "id": "q018",
+            "category": "For Licensees",
+            "question": "What happens if I want to use the material in a way that is not permitted by the license?",
+            "reference_answer": "Contact the rights holders to ask for permission. Otherwise, unless an exception or limitation to copyright applies, your use of the material may violate the Creative Commons license. If you violate the terms of the license, your rights to use the material will be automatically terminated, and you may be liable for copyright infringement.",
+            "key_concepts": [
+                "contact rights holder",
+                "ask permission",
+                "automatically terminated",
+                "copyright infringement"
+            ],
+            "difficulty": "medium"
+        },
+        {
+            "id": "q019",
+            "category": "For Licensees",
+            "question": "Do I always have to comply with the license terms? If not, what are the exceptions?",
+            "reference_answer": "You need to comply with the license terms if what you are doing would otherwise require permission from the rights holder. If your use would not require permission from the rights holder because it falls under an exception or limitation, such as fair use, or because the material has come into the public domain, the license does not apply, and you do not need to comply with its terms and conditions. Additionally, if you are using an excerpt small enough to be uncopyrightable, the license does not apply to your use, and you do not need to comply with its terms.\n\nHowever, if you are using excerpts of CC-licensed material which individually are minimal and do not require license compliance, but together make up a significant copyrightable chunk, you must comply with the license terms. For example, if you quote many individual lines from a poem across several sections of a blog post, and your use is not a fair use, you must comply with the license even though no individual line would have been a substantial enough portion of the work to require this.",
+            "key_concepts": [
+                "comply if permission needed",
+                "exception or limitation",
+                "fair use",
+                "public domain",
+                "uncopyrightable excerpt",
+                "significant chunk"
+            ],
+            "difficulty": "hard"
+        },
+        {
+            "id": "q020",
+            "category": "About CC",
+            "question": "I love Creative Commons. How can I help?",
+            "reference_answer": "Please support CC by making a donation through our support page. Donations can be handled through PayPal or by credit card. You can also support CC by visiting our store.\n\nCC always welcomes your feedback, which you can provide by emailing info at creativecommons.org. You can also participate in CC's email discussion lists and share feedback and ideas in one of those forums.\n\nIf you are a software developer, sysadmin, or have other technical expertise, please join our developer community and help build the tools that build the commons.\n\nFinally, one of the best ways to support CC is by supporting our causes yourself. Follow our blog to find out about current issues where you can help get involved and spread the word, and advocate for free and open licensing in your own communities.",
+            "key_concepts": [
+                "donation",
+                "feedback",
+                "developer community",
+                "support causes",
+                "advocate"
+            ],
+            "difficulty": "easy"
+        }
+    ]
+}

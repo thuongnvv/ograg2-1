@@ -58,13 +58,18 @@ class OntologyManager:
                 sha256.update(chunk)
         return sha256.hexdigest()
     
-    def add_ontology(self, owl_file: str, name: Optional[str] = None) -> str:
+    def add_ontology(self, owl_file: str, name: Optional[str] = None, 
+                     group_id: Optional[str] = None, group_index: int = 0,
+                     source_url: Optional[str] = None) -> str:
         """
         Add new ontology to workspace
         
         Args:
             owl_file: Path to OWL file
             name: Optional custom name (auto-detected if not provided)
+            group_id: Optional group ID for chunked ontologies from same source
+            group_index: Index within group (0, 1, 2...)
+            source_url: Original source URL (for grouped ontologies)
         
         Returns:
             ontology_id: Unique ID for this ontology
@@ -99,10 +104,100 @@ class OntologyManager:
             'parsed_dir': None,
             'error_message': None,
             'metadata': None,
+            # Group info for chunked ontologies
+            'group_id': group_id,
+            'group_index': group_index,
+            'source_url': source_url,
         }
         
         self._save_index()
         return ontology_id
+    
+    def add_ontology_group(self, owl_files: List[str], group_id: str, 
+                          group_name: str, source_url: str) -> List[str]:
+        """
+        Add a group of ontologies from chunked source
+        
+        Args:
+            owl_files: List of OWL file paths
+            group_id: Shared group ID
+            group_name: Name for the group
+            source_url: Original source URL
+        
+        Returns:
+            List of ontology IDs
+        """
+        ontology_ids = []
+        
+        for i, owl_file in enumerate(owl_files):
+            chunk_name = f"{group_name} (Part {i+1}/{len(owl_files)})"
+            onto_id = self.add_ontology(
+                owl_file=owl_file,
+                name=chunk_name,
+                group_id=group_id,
+                group_index=i,
+                source_url=source_url
+            )
+            ontology_ids.append(onto_id)
+        
+        return ontology_ids
+    
+    def get_group_ontologies(self, group_id: str) -> List[Dict]:
+        """Get all ontologies belonging to a group"""
+        return [o for o in self.ontologies.values() if o.get('group_id') == group_id]
+    
+    def list_ontology_groups(self) -> List[Dict]:
+        """
+        List unique groups + non-grouped ontologies
+        
+        Returns single entry per group (using first ontology as representative)
+        """
+        groups_seen = set()
+        result = []
+        
+        for onto in self.list_ontologies():
+            group_id = onto.get('group_id')
+            
+            if group_id:
+                if group_id not in groups_seen:
+                    groups_seen.add(group_id)
+                    # Get all ontologies in this group
+                    group_ontos = self.get_group_ontologies(group_id)
+                    
+                    # Determine group status
+                    statuses = [o['status'] for o in group_ontos]
+                    if any(s == 'error' for s in statuses):
+                        group_status = 'error'
+                    elif all(s == 'ready' for s in statuses):
+                        group_status = 'ready'
+                    else:
+                        group_status = 'processing'
+                    
+                    # Create group entry
+                    result.append({
+                        'id': group_id,
+                        'type': 'group',
+                        'name': onto.get('source_url', onto['name']).split('/')[-1] or onto['name'],
+                        'source_url': onto.get('source_url'),
+                        'ontology_count': len(group_ontos),
+                        'ontology_ids': [o['id'] for o in sorted(group_ontos, key=lambda x: x.get('group_index', 0))],
+                        'status': group_status,
+                        'created_at': onto['created_at']
+                    })
+            else:
+                # Non-grouped ontology
+                result.append({
+                    'id': onto['id'],
+                    'type': 'single',
+                    'name': onto['name'],
+                    'source_url': onto.get('source_url'),
+                    'ontology_count': 1,
+                    'ontology_ids': [onto['id']],
+                    'status': onto['status'],
+                    'created_at': onto['created_at']
+                })
+        
+        return result
     
     def update_status(self, ontology_id: str, status: ProcessingStatus, 
                      error_message: Optional[str] = None):
